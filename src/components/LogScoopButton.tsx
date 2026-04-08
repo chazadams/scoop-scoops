@@ -1,0 +1,21 @@
+'use client';
+
+import { useState } from 'react';
+import LogScoopModal from './LogScoopModal';
+
+export default function LogScoopButton() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 text-white font-semibold text-base hover:bg-rose-600 active:scale-95 transition-all shadow-lg shadow-rose-200"
+      >
+        <span>🍦</span>
+        Log a Scoop
+      </button>
+      <LogScoopModal isOpen={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
