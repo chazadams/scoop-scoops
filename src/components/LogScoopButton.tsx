@@ -3,8 +3,13 @@
 import { useState } from 'react';
 import LogScoopModal from './LogScoopModal';
 
-export default function LogScoopButton() {
+export default function LogScoopButton({ onScoopLogged }: { onScoopLogged?: () => void }) {
   const [open, setOpen] = useState(false);
+
+  const handleClose = (logged?: boolean) => {
+    setOpen(false);
+    if (logged) onScoopLogged?.();
+  };
 
   return (
     <>
@@ -15,7 +20,7 @@ export default function LogScoopButton() {
         <span>🍦</span>
         Log a Scoop
       </button>
-      <LogScoopModal isOpen={open} onClose={() => setOpen(false)} />
+      <LogScoopModal isOpen={open} onClose={handleClose} />
     </>
   );
 }

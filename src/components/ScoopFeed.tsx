@@ -1,97 +1,104 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
 import ScoopCard from './ScoopCard';
 import { type Scoop } from '@/types/scoop';
 
-const MOCK_SCOOPS: Scoop[] = [
-  {
-    id: '1',
-    stand: { name: "Zesto's Ice Cream", placeId: '1', address: '123 Maple St, Springfield, IL' },
-    flavor: 'Black Raspberry',
-    size: 'large',
-    container: 'waffle-cone',
-    toppings: ['Rainbow Sprinkles', 'Hot Fudge'],
-    flavorRating: 5,
-    valueRating: 4,
-    notes: "Best black raspberry I've ever had. The waffle cone was perfectly crispy.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 45),
-    user: { name: 'Chaz' },
-  },
-  {
-    id: '2',
-    stand: { name: "Dairy Queen", placeId: '2', address: '456 Oak Ave, Riverside, IL' },
-    flavor: 'Cookies & Cream',
-    size: 'medium',
-    container: 'cup',
-    toppings: ['Whipped Cream', 'Cherry'],
-    flavorRating: 3,
-    valueRating: 3,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3),
-    user: { name: 'Maya' },
-  },
-  {
-    id: '3',
-    stand: { name: "Sweet Peaks Creamery", placeId: '3', address: '789 Pine Rd, Lakewood, IL' },
-    flavor: 'Salted Caramel',
-    size: 'small',
-    container: 'sugar-cone',
-    toppings: ['Caramel', 'Chopped Nuts'],
-    flavorRating: 5,
-    valueRating: 5,
-    notes: 'Tiny stand but absolutely worth the drive.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 8),
-    user: { name: 'Jordan' },
-  },
-  {
-    id: '4',
-    stand: { name: "The Creamery on Main", placeId: '4', address: '22 Main St, Evanston, IL' },
-    flavor: 'Mint Chip',
-    size: 'large',
-    container: 'dish',
-    toppings: ['Hot Fudge', 'Crushed Oreos', 'Whipped Cream'],
-    flavorRating: 4,
-    valueRating: 2,
-    notes: 'Great flavor but the large is somehow smaller than everywhere else.',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    user: { name: 'Sam' },
-  },
-  {
-    id: '5',
-    stand: { name: "Rita's Water Ice", placeId: '5', address: '55 Boardwalk Blvd, Waukegan, IL' },
-    flavor: 'Lemon Sorbet',
-    size: 'kids',
-    container: 'cup',
-    toppings: [],
-    flavorRating: 4,
-    valueRating: 5,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 30),
-    user: { name: 'Priya' },
-  },
-  {
-    id: '6',
-    stand: { name: "Andy's Frozen Custard", placeId: '6', address: '10 Lake Shore Dr, Chicago, IL' },
-    flavor: 'Concrete Mixer: Brownie Fudge',
-    size: 'xl',
-    container: 'cup',
-    toppings: ['Hot Fudge', 'Gummy Bears', 'Marshmallows'],
-    flavorRating: 5,
-    valueRating: 4,
-    notes: "It's a lot. It's worth it.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    user: { name: 'Chaz' },
-  },
-];
+// Shape returned by GET /api/scoops
+interface ScoopRow {
+  id: string;
+  flavor: string;
+  size: string;
+  container: string;
+  price: number | null;
+  toppings: string[];
+  flavor_rating: number;
+  value_rating: number;
+  notes: string | null;
+  created_at: string;
+  users: { name: string } | null;
+  stands: { id: string; place_id: string; name: string; address: string } | null;
+}
+
+function toScoop(row: ScoopRow): Scoop {
+  return {
+    id: row.id,
+    flavor: row.flavor,
+    size: row.size as Scoop['size'],
+    container: row.container as Scoop['container'],
+    price: row.price ?? undefined,
+    toppings: row.toppings as Scoop['toppings'],
+    flavorRating: row.flavor_rating,
+    valueRating: row.value_rating,
+    notes: row.notes ?? undefined,
+    createdAt: new Date(row.created_at),
+    user: { name: row.users?.name ?? 'Anonymous' },
+    stand: {
+      name: row.stands?.name ?? 'Unknown stand',
+      placeId: row.stands?.place_id ?? '',
+      address: row.stands?.address ?? '',
+    },
+  };
+}
 
 export default function ScoopFeed() {
+  const [scoops, setScoops] = useState<Scoop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchScoops = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/scoops');
+      if (!res.ok) throw new Error('Failed to load scoops');
+      const rows: ScoopRow[] = await res.json();
+      setScoops(rows.map(toScoop));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchScoops(); }, [fetchScoops]);
+
   return (
     <section className="max-w-5xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-stone-900">Recent Scoops</h2>
         <span className="text-sm text-stone-400">Community feed</span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {MOCK_SCOOPS.map((scoop) => (
-          <ScoopCard key={scoop.id} scoop={scoop} />
-        ))}
-      </div>
+
+      {loading && (
+        <div className="text-center py-16 text-stone-400 text-sm">Loading scoops…</div>
+      )}
+
+      {error && (
+        <div className="text-center py-16">
+          <p className="text-stone-500 text-sm mb-3">{error}</p>
+          <button
+            onClick={fetchScoops}
+            className="text-sm text-rose-500 hover:text-rose-600 font-medium"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && scoops.length === 0 && (
+        <div className="text-center py-16 text-stone-400 text-sm">
+          No scoops yet — be the first to log one!
+        </div>
+      )}
+
+      {!loading && !error && scoops.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {scoops.map((scoop) => (
+            <ScoopCard key={scoop.id} scoop={scoop} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

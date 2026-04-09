@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import StandSearch from './StandSearch';
+import { useAuth } from '@/context/AuthContext';
 import StarRating from './StarRating';
 import {
   TOPPINGS,
@@ -15,7 +16,7 @@ import {
 
 interface LogScoopModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose: (logged?: boolean) => void;
 }
 
 const FLAVOR_DESCRIPTORS = ['Disappointing', 'Below average', 'Pretty good', 'Delicious', 'Life-changing'];
@@ -76,6 +77,7 @@ function ModalNav({
 }
 
 export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
+  const { user, signInWithGoogle } = useAuth();
   const [step, setStep] = useState(1);
   const [stand, setStand] = useState<Stand | null>(null);
   const [flavor, setFlavor] = useState('');
@@ -86,6 +88,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [valueRating, setValueRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Close on Escape
   useEffect(() => {
@@ -101,6 +105,46 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     setStep(1); setStand(null); setFlavor(''); setSize(null);
     setContainer(null); setToppings([]); setFlavorRating(0);
     setValueRating(0); setNotes(''); setSubmitted(false);
+    setSubmitting(false); setSubmitError(null);
+  };
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      if (!user) {
+        signInWithGoogle();
+        return;
+      }
+
+      const res = await fetch('/api/scoops', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          stand,
+          flavor,
+          size,
+          container,
+          toppings,
+          flavorRating,
+          valueRating,
+          notes,
+          userId: user.id,
+        }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let message = 'Something went wrong';
+        try { message = JSON.parse(text).error ?? message; } catch {}
+        throw new Error(message);
+      }
+      setSubmitted(true);
+      onClose(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = () => { reset(); onClose(); };
@@ -271,11 +315,14 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                       className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm resize-none"
                     />
                   </div>
+                  {submitError && (
+                    <p className="text-sm text-red-500">{submitError}</p>
+                  )}
                   <ModalNav
                     onBack={() => setStep(2)}
-                    onNext={() => setSubmitted(true)}
-                    nextLabel="Log It! 🍦"
-                    nextDisabled={!step3Valid}
+                    onNext={handleSubmit}
+                    nextLabel={submitting ? 'Saving…' : 'Log It! 🍦'}
+                    nextDisabled={!step3Valid || submitting}
                   />
                 </div>
               )}

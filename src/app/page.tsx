@@ -1,8 +1,13 @@
+'use client';
+
+import { useState } from 'react';
 import Header from '@/components/Header';
 import ScoopFeed from '@/components/ScoopFeed';
 import LogScoopButton from '@/components/LogScoopButton';
 
 export default function Home() {
+  const [feedKey, setFeedKey] = useState(0);
+
   return (
     <>
       <Header />
@@ -17,11 +22,11 @@ export default function Home() {
             <p className="text-lg text-stone-500 max-w-sm">
               Rate ice cream stands, log your flavors, and discover the best spots near you.
             </p>
-            <LogScoopButton />
+            <LogScoopButton onScoopLogged={() => setFeedKey((k) => k + 1)} />
           </div>
         </section>
 
-        <ScoopFeed />
+        <ScoopFeed key={feedKey} />
       </main>
 
       <footer className="border-t border-stone-100 py-6 text-center text-xs text-stone-400">

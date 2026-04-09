@@ -28,6 +28,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url_here') {
+    return Response.json({ error: 'Supabase is not configured yet' }, { status: 503 });
+  }
+
   const body = await request.json();
   const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId } = body;
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import Script from 'next/script';
+import { AuthProvider } from '@/context/AuthContext';
 import './globals.css';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-stone-50 text-stone-900">
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
       <Script
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
