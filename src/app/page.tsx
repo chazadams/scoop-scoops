@@ -60,7 +60,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-stone-100 py-6 text-center text-xs text-stone-400">
-        Scoop Scoops — the Letterboxd of ice cream stands 🍦
+        Scoop Scoops — The Ice Cream Stand Guide
       </footer>
     </>
   );
