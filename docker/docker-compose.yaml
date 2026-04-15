@@ -1,0 +1,26 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    environment:
+      - TAILSCALE_AUTHKEY=${TAILSCALE_AUTHKEY}
+    volumes:
+      - ./tailscale-data:/var/lib/tailscale
+    cap_add:
+      - net_admin
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    depends_on:
+      - nextjs
+    restart: unless-stopped
+
+  nextjs:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+    restart: unless-stopped
