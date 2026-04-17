@@ -84,6 +84,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [size, setSize] = useState<Size | null>(null);
   const [container, setContainer] = useState<ContainerType | null>(null);
   const [toppings, setToppings] = useState<Topping[]>([]);
+  const [price, setPrice] = useState('');
   const [flavorRating, setFlavorRating] = useState(0);
   const [valueRating, setValueRating] = useState(0);
   const [notes, setNotes] = useState('');
@@ -103,7 +104,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
   const reset = () => {
     setStep(1); setStand(null); setFlavor(''); setSize(null);
-    setContainer(null); setToppings([]); setFlavorRating(0);
+    setContainer(null); setToppings([]); setPrice(''); setFlavorRating(0);
     setValueRating(0); setNotes(''); setSubmitted(false);
     setSubmitting(false); setSubmitError(null);
   };
@@ -125,6 +126,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
           flavor,
           size,
           container,
+          price: price ? parseInt(price, 10) : null,
           toppings,
           flavorRating,
           valueRating,
@@ -278,6 +280,34 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           {t}
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Price */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <label className="text-sm font-medium text-stone-700">
+                        Price <span className="font-normal text-stone-400">(optional)</span>
+                      </label>
+                      <div className="relative group">
+                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 text-stone-500 text-xs cursor-default leading-none">?</span>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 px-3 py-2 bg-stone-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                          Enter whole dollar amounts only — no cents.
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-stone-800" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="0"
+                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm"
+                      />
                     </div>
                   </div>
 

@@ -30,7 +30,7 @@ export default function StandSearch({ selected, onSelect }: StandSearchProps) {
     if (!ready || !inputRef.current || autocompleteRef.current) return;
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['establishment'],
+      types: ['food', 'restaurant', 'store'],
       fields: ['name', 'place_id', 'formatted_address'],
     });
 

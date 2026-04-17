@@ -44,6 +44,12 @@ export default function ScoopCard({ scoop }: { scoop: Scoop }) {
           <span>{SIZE_LABELS[scoop.size]}</span>
           <span className="text-stone-300">·</span>
           <span>{containerLabel}</span>
+          {scoop.price != null && (
+            <>
+              <span className="text-stone-300">·</span>
+              <span className="text-stone-500">${scoop.price}</span>
+            </>
+          )}
         </div>
         {scoop.toppings.length > 0 && (
           <p className="text-xs text-stone-400 mt-1.5">
