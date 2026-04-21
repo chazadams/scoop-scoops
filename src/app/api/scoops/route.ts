@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const { data: standRow, error: standError } = await supabase
     .from('stands')
     .upsert(
-      { place_id: stand.placeId, name: stand.name, address: stand.address },
+      { place_id: stand.placeId, name: stand.name, address: stand.address, lat: stand.lat ?? null, lng: stand.lng ?? null },
       { onConflict: 'place_id' }
     )
     .select('id')

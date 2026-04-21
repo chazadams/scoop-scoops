@@ -22,6 +22,8 @@ export interface Stand {
   name: string;
   placeId: string;
   address: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Scoop {

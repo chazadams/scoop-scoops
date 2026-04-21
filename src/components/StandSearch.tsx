@@ -31,16 +31,19 @@ export default function StandSearch({ selected, onSelect }: StandSearchProps) {
 
     autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
       types: ['food', 'restaurant', 'store'],
-      fields: ['name', 'place_id', 'formatted_address'],
+      fields: ['name', 'place_id', 'formatted_address', 'geometry'],
     });
 
     autocompleteRef.current.addListener('place_changed', () => {
       const place = autocompleteRef.current!.getPlace();
       if (place.name && place.place_id) {
+        const loc = place.geometry?.location;
         const stand: Stand = {
           name: place.name,
           placeId: place.place_id,
           address: place.formatted_address ?? '',
+          lat: loc?.lat() ?? undefined,
+          lng: loc?.lng() ?? undefined,
         };
         onSelect(stand);
         setInputValue(place.name);
