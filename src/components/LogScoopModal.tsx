@@ -239,7 +239,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                   {/* Container */}
                   <div>
                     <label className="text-sm font-medium text-stone-700 block mb-1.5">
-                      Cone or Dish?
+                      Cone or Speciality?
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {CONTAINERS.map(([value, { label, emoji }]) => (
