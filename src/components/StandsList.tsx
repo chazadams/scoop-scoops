@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import StandCard from './StandCard';
 import StandModal from './StandModal';
 
-type SortMode = 'recent' | 'most-reviews' | 'nearest';
+type SortMode = 'today' | 'recent' | 'most-reviews' | 'nearest';
 
 interface StandRow {
   stand_id: string;
@@ -51,20 +50,47 @@ function toEntry(row: StandRow): StandEntry {
 }
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 3958.8; // miles
+  const R = 3958.8;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;
   const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function isToday(date: Date): boolean {
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function timeAgo(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
+}
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <span>
+      {[1, 2, 3, 4, 5].map((s) => (
+        <span key={s} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-stone-200'}>★</span>
+      ))}
+    </span>
+  );
+}
+
 const SORT_LABELS: Record<SortMode, string> = {
+  today: 'Today',
   recent: 'Most Recent',
   'most-reviews': 'Most Reviews',
   nearest: 'Nearest',
 };
 
-export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
+export default function StandsList() {
   const [stands, setStands] = useState<StandEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,9 +118,8 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
     }
   }, []);
 
-  useEffect(() => { fetchStands(); }, [fetchStands, refreshKey]);
+  useEffect(() => { fetchStands(); }, [fetchStands]);
 
-  // Focus zip input when switching to nearest mode
   useEffect(() => {
     if (sortMode === 'nearest') zipRef.current?.focus();
   }, [sortMode]);
@@ -120,7 +145,11 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
     }
   }, [zipInput]);
 
-  const sorted = [...stands].sort((a, b) => {
+  const filtered = sortMode === 'today'
+    ? stands.filter((s) => isToday(s.lastReviewedAt))
+    : stands;
+
+  const sorted = [...filtered].sort((a, b) => {
     if (sortMode === 'most-reviews') return b.totalScoops - a.totalScoops;
     if (sortMode === 'nearest') {
       if (!userCoords) return 0;
@@ -128,15 +157,14 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
       const distB = b.lat != null && b.lng != null ? haversine(userCoords.lat, userCoords.lng, b.lat, b.lng) : Infinity;
       return distA - distB;
     }
-    // recent
     return b.lastReviewedAt.getTime() - a.lastReviewedAt.getTime();
   });
 
   return (
-    <section className="max-w-5xl mx-auto px-4 py-10">
+    <section className="max-w-2xl mx-auto px-4 py-10">
       {/* Sort controls */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
             <button
               key={mode}
@@ -152,7 +180,6 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
           ))}
         </div>
 
-        {/* Zip input — only shown in nearest mode */}
         {sortMode === 'nearest' && (
           <div className="flex items-center gap-2">
             <input
@@ -172,9 +199,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
               {geoLoading ? '…' : 'Go'}
             </button>
             {geoError && <p className="text-xs text-red-500">{geoError}</p>}
-            {userCoords && !geoError && (
-              <p className="text-xs text-stone-400">Sorted by distance</p>
-            )}
+            {userCoords && !geoError && <p className="text-xs text-stone-400">Sorted by distance</p>}
           </div>
         )}
       </div>
@@ -186,42 +211,66 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
       {error && (
         <div className="text-center py-16">
           <p className="text-stone-500 text-sm mb-3">{error}</p>
-          <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">
-            Try again
-          </button>
+          <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">Try again</button>
         </div>
       )}
 
-      {!loading && !error && stands.length === 0 && (
+      {!loading && !error && sorted.length === 0 && (
         <div className="text-center py-16 text-stone-400 text-sm">
-          No stands yet — log a scoop to add the first one!
+          {sortMode === 'today' ? 'No stands visited today — be the first!' : 'No stands yet — log a scoop to add the first one!'}
         </div>
       )}
 
       {!loading && !error && sorted.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ul className="flex flex-col divide-y divide-stone-100">
           {sorted.map((s) => {
             const distance =
               sortMode === 'nearest' && userCoords && s.lat != null && s.lng != null
                 ? haversine(userCoords.lat, userCoords.lng, s.lat, s.lng)
-                : sortMode === 'nearest'
-                ? null
-                : undefined;
+                : null;
+
             return (
-              <StandCard
-                key={s.standId}
-                name={s.name}
-                address={s.address}
-                totalScoops={s.totalScoops}
-                avgFlavorRating={s.avgFlavorRating}
-                avgValueRating={s.avgValueRating}
-                lastReviewedAt={s.lastReviewedAt}
-                distance={distance}
-                onClick={() => setSelectedStand(s)}
-              />
+              <li key={s.standId}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedStand(s)}
+                  className="w-full text-left py-4 px-2 hover:bg-stone-50 rounded-xl transition-colors group"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-stone-900 text-sm group-hover:text-rose-600 transition-colors truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-xs text-stone-400 mt-0.5 truncate">{s.address}</p>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      {distance != null ? (
+                        <span className="text-xs font-medium text-rose-500 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full">
+                          {distance.toFixed(1)} mi
+                        </span>
+                      ) : (
+                        <span className="text-xs text-stone-400">{timeAgo(s.lastReviewedAt)}</span>
+                      )}
+                      <span className="text-xs text-stone-400">{s.totalScoops} {s.totalScoops === 1 ? 'review' : 'reviews'}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 mt-2">
+                    <div className="flex items-center gap-1 text-xs text-stone-500">
+                      <span>Flavor</span>
+                      <Stars rating={s.avgFlavorRating} />
+                      <span className="text-stone-400">{s.avgFlavorRating.toFixed(1)}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-stone-500">
+                      <span>Value</span>
+                      <Stars rating={s.avgValueRating} />
+                      <span className="text-stone-400">{s.avgValueRating.toFixed(1)}</span>
+                    </div>
+                  </div>
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       <StandModal

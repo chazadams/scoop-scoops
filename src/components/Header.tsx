@@ -13,8 +13,8 @@ export default function Header() {
           <ScoopScoopsLogo />
         </Link>
         <nav className="hidden sm:flex items-center gap-6 text-sm text-stone-500">
-          <Link href="#" className="hover:text-stone-900 transition-colors">Discover</Link>
-          <Link href="#" className="hover:text-stone-900 transition-colors">Stands</Link>
+          <Link href="/" className="hover:text-stone-900 transition-colors">Discover</Link>
+          <Link href="/stands" className="hover:text-stone-900 transition-colors">Stands</Link>
         </nav>
         <div className="flex items-center gap-3">
           {!loading && !user && (

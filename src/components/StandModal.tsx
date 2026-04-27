@@ -10,6 +10,7 @@ interface StandModalProps {
     totalScoops: number;
     avgFlavorRating: number;
     avgValueRating: number;
+    lastReviewedAt: Date;
   } | null;
   onClose: () => void;
 }
@@ -92,6 +93,14 @@ export default function StandModal({ stand, onClose }: StandModalProps) {
               <span className="text-xs text-stone-400 mt-0.5">value</span>
             </div>
           </div>
+
+          {/* Last scooped */}
+          <p className="text-xs text-stone-400 -mt-2">
+            Last scooped{' '}
+            <span className="text-stone-600 font-medium">
+              {stand.lastReviewedAt.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+            </span>
+          </p>
 
           {/* Ratings */}
           <div className="flex flex-col gap-2">
