@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import StandCard from './StandCard';
+import StandModal from './StandModal';
 
 type SortMode = 'recent' | 'most-reviews' | 'nearest';
 
@@ -67,6 +68,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
   const [stands, setStands] = useState<StandEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStand, setSelectedStand] = useState<StandEntry | null>(null);
 
   const [sortMode, setSortMode] = useState<SortMode>('recent');
   const [zipInput, setZipInput] = useState('');
@@ -215,11 +217,17 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
                 avgValueRating={s.avgValueRating}
                 lastReviewedAt={s.lastReviewedAt}
                 distance={distance}
+                onClick={() => setSelectedStand(s)}
               />
             );
           })}
         </div>
       )}
+
+      <StandModal
+        stand={selectedStand}
+        onClose={() => setSelectedStand(null)}
+      />
     </section>
   );
 }

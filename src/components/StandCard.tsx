@@ -6,6 +6,7 @@ interface StandCardProps {
   avgValueRating: number;
   lastReviewedAt: Date;
   distance?: number | null;
+  onClick?: () => void;
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -33,9 +34,13 @@ export default function StandCard({
   avgValueRating,
   lastReviewedAt,
   distance,
+  onClick,
 }: StandCardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+    <div
+      className={`bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
       {/* Stand header */}
       <div className="px-4 pt-4 pb-3 border-b border-stone-50">
         <div className="flex items-start justify-between gap-2">
