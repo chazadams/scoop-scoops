@@ -18,8 +18,7 @@ export async function GET(
       flavor_rating,
       value_rating,
       notes,
-      created_at,
-      users ( name )
+      created_at
     `)
     .eq('stand_id', standId)
     .order('created_at', { ascending: false })

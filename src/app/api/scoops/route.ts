@@ -14,7 +14,6 @@ export async function GET() {
       value_rating,
       notes,
       created_at,
-      users ( name ),
       stands ( id, place_id, name, address )
     `)
     .order('created_at', { ascending: false })

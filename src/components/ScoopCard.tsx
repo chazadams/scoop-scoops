@@ -79,13 +79,6 @@ export default function ScoopCard({ scoop }: { scoop: Scoop }) {
         </div>
       )}
 
-      {/* User */}
-      <div className="px-4 pb-3 flex items-center gap-1.5">
-        <div className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-xs font-bold text-rose-500 dark:text-rose-400">
-          {scoop.user.name[0]}
-        </div>
-        <span className="text-xs text-stone-400 dark:text-stone-500">{scoop.user.name}</span>
-      </div>
     </div>
   );
 }

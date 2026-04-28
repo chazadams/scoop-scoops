@@ -38,7 +38,6 @@ export interface Scoop {
   valueRating: number;
   notes?: string;
   createdAt: Date;
-  user: { name: string };
 }
 
 export const SIZE_LABELS: Record<Size, string> = {

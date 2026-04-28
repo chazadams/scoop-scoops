@@ -13,7 +13,6 @@ interface ReviewRow {
   value_rating: number;
   notes: string | null;
   created_at: string;
-  users: { name: string } | null;
 }
 
 interface StandModalProps {
@@ -254,7 +253,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                   {r.notes && (
                     <p className="text-xs text-stone-600 dark:text-stone-400 italic">"{r.notes}"</p>
                   )}
-                  <p className="text-xs text-stone-400 dark:text-stone-500">— {r.users?.name ?? 'Anonymous'}</p>
                 </div>
               );
             })}
