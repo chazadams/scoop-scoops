@@ -21,6 +21,60 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* SVG logo text adapts in dark mode */
+/* ─── Dark theme: Warm Cocoa ──────────────────────────────────────
+   Deep espresso browns with amber undertones. Cozy, on-brand. */
+html.dark.theme-warm {
+  --color-stone-950: #130d08;
+  --color-stone-900: #1e1409;
+  --color-stone-800: #2a1d0f;
+  --color-stone-700: #3a2a18;
+  --color-stone-600: #5c4230;
+  --color-stone-500: #7d5c48;
+  --color-stone-400: #a07d68;
+  --color-stone-300: #c4a898;
+  --color-stone-200: #dcc8bc;
+  --color-stone-100: #f0e8e0;
+}
+
+/* ─── Dark theme: Deep Slate ──────────────────────────────────────
+   Blue-tinted darks. Crisp, modern, high contrast. */
+html.dark.theme-slate {
+  --color-stone-950: #020618;
+  --color-stone-900: #0f1729;
+  --color-stone-800: #1d2a42;
+  --color-stone-700: #2d3f5f;
+  --color-stone-600: #415572;
+  --color-stone-500: #596b88;
+  --color-stone-400: #7a8fa8;
+  --color-stone-300: #9db0c8;
+  --color-stone-200: #c0cfde;
+  --color-stone-100: #e2eaf4;
+}
+
+/* ─── Dark theme: Soft Charcoal ───────────────────────────────────
+   Pure neutral grays, not as dark. Easier on the eyes. */
+html.dark.theme-soft {
+  --color-stone-950: #1a1a1a;
+  --color-stone-900: #252525;
+  --color-stone-800: #303030;
+  --color-stone-700: #3d3d3d;
+  --color-stone-600: #555555;
+  --color-stone-500: #707070;
+  --color-stone-400: #8f8f8f;
+  --color-stone-300: #b0b0b0;
+  --color-stone-200: #cecece;
+  --color-stone-100: #ebebeb;
+}
+
+/* SVG logo text adapts per dark theme */
 .dark .wordmark { fill: #ededed; }
-.dark .tagline { fill: #9e8f7e; }
+.dark .tagline  { fill: #9e8f7e; }
+
+.dark.theme-warm .wordmark { fill: #f0e8e0; }
+.dark.theme-warm .tagline  { fill: #a08878; }
+
+.dark.theme-slate .wordmark { fill: #e2eaf4; }
+.dark.theme-slate .tagline  { fill: #8a9db8; }
+
+.dark.theme-soft .wordmark { fill: #ebebeb; }
+.dark.theme-soft .tagline  { fill: #909090; }
