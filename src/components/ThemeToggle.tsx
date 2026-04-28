@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTheme, type DarkStyle } from '@/context/ThemeContext';
 
 type Theme = 'system' | 'light' | 'dark';
@@ -49,7 +50,13 @@ const ICONS: Record<Theme, React.ReactNode> = {
 };
 
 export default function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
   const { theme, setTheme, darkStyle, setDarkStyle } = useTheme();
+
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) return null;
+
   const isDark = theme === 'dark' || theme === 'system';
 
   return (
