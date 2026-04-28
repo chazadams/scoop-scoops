@@ -69,6 +69,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStand, setSelectedStand] = useState<StandEntry | null>(null);
+  const [modalView, setModalView] = useState<'details' | 'reviews'>('details');
 
   const [sortMode, setSortMode] = useState<SortMode>('recent');
   const [zipInput, setZipInput] = useState('');
@@ -144,7 +145,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
               className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                 sortMode === mode
                   ? 'bg-rose-500 border-rose-500 text-white'
-                  : 'border-stone-300 text-stone-600 hover:border-rose-300 hover:text-rose-600'
+                  : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-rose-300 hover:text-rose-600'
               }`}
             >
               {SORT_LABELS[mode]}
@@ -162,12 +163,12 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
               onChange={(e) => { setZipInput(e.target.value); setUserCoords(null); setGeoError(null); }}
               onKeyDown={(e) => { if (e.key === 'Enter') geocodeZip(); }}
               placeholder="Enter zip code"
-              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm"
+              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
             />
             <button
               onClick={geocodeZip}
               disabled={!zipInput.trim() || geoLoading}
-              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 text-stone-700 hover:bg-stone-200 disabled:opacity-40 transition-colors"
+              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-40 transition-colors"
             >
               {geoLoading ? '…' : 'Go'}
             </button>
@@ -180,12 +181,12 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
       </div>
 
       {loading && (
-        <div className="text-center py-16 text-stone-400 text-sm">Loading stands…</div>
+        <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
       )}
 
       {error && (
         <div className="text-center py-16">
-          <p className="text-stone-500 text-sm mb-3">{error}</p>
+          <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
           <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">
             Try again
           </button>
@@ -193,7 +194,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
       )}
 
       {!loading && !error && stands.length === 0 && (
-        <div className="text-center py-16 text-stone-400 text-sm">
+        <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">
           No stands yet — log a scoop to add the first one!
         </div>
       )}
@@ -217,7 +218,8 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
                 avgValueRating={s.avgValueRating}
                 lastReviewedAt={s.lastReviewedAt}
                 distance={distance}
-                onClick={() => setSelectedStand(s)}
+                onShopClick={() => { setSelectedStand(s); setModalView('details'); }}
+                onReviewClick={() => { setSelectedStand(s); setModalView('reviews'); }}
               />
             );
           })}
@@ -226,6 +228,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
 
       <StandModal
         stand={selectedStand ? {
+          standId: selectedStand.standId,
           placeId: selectedStand.placeId,
           name: selectedStand.name,
           address: selectedStand.address,
@@ -234,6 +237,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
           avgValueRating: selectedStand.avgValueRating,
           lastReviewedAt: selectedStand.lastReviewedAt,
         } : null}
+        initialView={modalView}
         onClose={() => setSelectedStand(null)}
       />
     </section>

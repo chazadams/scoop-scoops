@@ -77,7 +77,7 @@ function Stars({ rating }: { rating: number }) {
   return (
     <span>
       {[1, 2, 3, 4, 5].map((s) => (
-        <span key={s} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-stone-200'}>★</span>
+        <span key={s} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-stone-200 dark:text-stone-700'}>★</span>
       ))}
     </span>
   );
@@ -172,7 +172,7 @@ export default function StandsList() {
               className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                 sortMode === mode
                   ? 'bg-rose-500 border-rose-500 text-white'
-                  : 'border-stone-300 text-stone-600 hover:border-rose-300 hover:text-rose-600'
+                  : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-rose-300 hover:text-rose-600'
               }`}
             >
               {SORT_LABELS[mode]}
@@ -189,12 +189,12 @@ export default function StandsList() {
               onChange={(e) => { setZipInput(e.target.value); setUserCoords(null); setGeoError(null); }}
               onKeyDown={(e) => { if (e.key === 'Enter') geocodeZip(); }}
               placeholder="Enter zip code"
-              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm"
+              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
             />
             <button
               onClick={geocodeZip}
               disabled={!zipInput.trim() || geoLoading}
-              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 text-stone-700 hover:bg-stone-200 disabled:opacity-40 transition-colors"
+              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-40 transition-colors"
             >
               {geoLoading ? '…' : 'Go'}
             </button>
@@ -205,12 +205,12 @@ export default function StandsList() {
       </div>
 
       {loading && (
-        <div className="text-center py-16 text-stone-400 text-sm">Loading stands…</div>
+        <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
       )}
 
       {error && (
         <div className="text-center py-16">
-          <p className="text-stone-500 text-sm mb-3">{error}</p>
+          <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
           <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">Try again</button>
         </div>
       )}
@@ -222,7 +222,7 @@ export default function StandsList() {
       )}
 
       {!loading && !error && sorted.length > 0 && (
-        <ul className="flex flex-col divide-y divide-stone-100">
+        <ul className="flex flex-col divide-y divide-stone-100 dark:divide-stone-800">
           {sorted.map((s) => {
             const distance =
               sortMode === 'nearest' && userCoords && s.lat != null && s.lng != null
@@ -234,14 +234,14 @@ export default function StandsList() {
                 <button
                   type="button"
                   onClick={() => setSelectedStand(s)}
-                  className="w-full text-left py-4 px-2 hover:bg-stone-50 rounded-xl transition-colors group"
+                  className="w-full text-left py-4 px-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="font-semibold text-stone-900 text-sm group-hover:text-rose-600 transition-colors truncate">
+                      <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate">
                         {s.name}
                       </p>
-                      <p className="text-xs text-stone-400 mt-0.5 truncate">{s.address}</p>
+                      <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 truncate">{s.address}</p>
                     </div>
                     <div className="shrink-0 flex flex-col items-end gap-1">
                       {distance != null ? (
@@ -249,21 +249,21 @@ export default function StandsList() {
                           {distance.toFixed(1)} mi
                         </span>
                       ) : (
-                        <span className="text-xs text-stone-400">{timeAgo(s.lastReviewedAt)}</span>
+                        <span className="text-xs text-stone-400 dark:text-stone-500">{timeAgo(s.lastReviewedAt)}</span>
                       )}
-                      <span className="text-xs text-stone-400">{s.totalScoops} {s.totalScoops === 1 ? 'review' : 'reviews'}</span>
+                      <span className="text-xs text-stone-400 dark:text-stone-500">{s.totalScoops} {s.totalScoops === 1 ? 'review' : 'reviews'}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center gap-1 text-xs text-stone-500">
+                    <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
                       <span>Flavor</span>
                       <Stars rating={s.avgFlavorRating} />
-                      <span className="text-stone-400">{s.avgFlavorRating.toFixed(1)}</span>
+                      <span className="text-stone-400 dark:text-stone-500">{s.avgFlavorRating.toFixed(1)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-stone-500">
+                    <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
                       <span>Value</span>
                       <Stars rating={s.avgValueRating} />
-                      <span className="text-stone-400">{s.avgValueRating.toFixed(1)}</span>
+                      <span className="text-stone-400 dark:text-stone-500">{s.avgValueRating.toFixed(1)}</span>
                     </div>
                   </div>
                 </button>
@@ -275,6 +275,7 @@ export default function StandsList() {
 
       <StandModal
         stand={selectedStand ? {
+          standId: selectedStand.standId,
           placeId: selectedStand.placeId,
           name: selectedStand.name,
           address: selectedStand.address,

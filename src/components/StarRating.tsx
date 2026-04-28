@@ -16,7 +16,7 @@ export default function StarRating({ value, onChange, label, descriptors }: Star
 
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <span className="text-sm font-medium text-stone-700">{label}</span>}
+      {label && <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{label}</span>}
       <div className="flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -28,11 +28,11 @@ export default function StarRating({ value, onChange, label, descriptors }: Star
             className="text-2xl leading-none transition-transform hover:scale-110 focus:outline-none"
             aria-label={`${star} star${star !== 1 ? 's' : ''}`}
           >
-            <span className={star <= display ? 'text-amber-400' : 'text-stone-200'}>★</span>
+            <span className={star <= display ? 'text-amber-400' : 'text-stone-200 dark:text-stone-700'}>★</span>
           </button>
         ))}
         {descriptor && (
-          <span className="ml-2 text-sm text-stone-500 italic">{descriptor}</span>
+          <span className="ml-2 text-sm text-stone-500 dark:text-stone-400 italic">{descriptor}</span>
         )}
       </div>
     </div>

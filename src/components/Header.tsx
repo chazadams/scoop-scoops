@@ -7,20 +7,20 @@ export default function Header() {
   const { user, loading, signInWithGoogle, signOut } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-stone-100">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur border-b border-stone-100 dark:border-stone-800">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" aria-label="Scoop Scoops">
           <ScoopScoopsLogo />
         </Link>
-        <nav className="hidden sm:flex items-center gap-6 text-sm text-stone-500">
-          <Link href="/" className="hover:text-stone-900 transition-colors">Discover</Link>
-          <Link href="/stands" className="hover:text-stone-900 transition-colors">Stands</Link>
+        <nav className="hidden sm:flex items-center gap-6 text-sm text-stone-500 dark:text-stone-400">
+          <Link href="/" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">Discover</Link>
+          <Link href="/stands" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">Stands</Link>
         </nav>
         <div className="flex items-center gap-3">
           {!loading && !user && (
             <button
               onClick={signInWithGoogle}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 text-sm font-medium text-stone-700 hover:bg-stone-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               <GoogleIcon />
               Sign in
@@ -28,15 +28,15 @@ export default function Header() {
           )}
           {!loading && user && (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-stone-600">
-                <div className="w-7 h-7 rounded-full bg-rose-100 flex items-center justify-center text-xs font-bold text-rose-500">
+              <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
+                <div className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-xs font-bold text-rose-500 dark:text-rose-400">
                   {(user.user_metadata?.full_name ?? user.email ?? '?')[0].toUpperCase()}
                 </div>
                 <span className="hidden sm:inline">{user.user_metadata?.full_name ?? user.email}</span>
               </div>
               <button
                 onClick={signOut}
-                className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
+                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
               >
                 Sign out
               </button>

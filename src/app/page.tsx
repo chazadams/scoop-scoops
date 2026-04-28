@@ -46,10 +46,10 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         {/* Hero */}
-        <section className="bg-gradient-to-b from-rose-50 via-amber-50 to-stone-50 py-20 px-4 text-center">
+        <section className="bg-gradient-to-b from-rose-50 via-amber-50 to-stone-50 dark:from-rose-950/20 dark:via-stone-900 dark:to-stone-900 py-20 px-4 text-center">
           <div className="max-w-xl mx-auto flex flex-col items-center gap-5">
             <HeroLogo />
-            <p className="text-lg text-stone-500 max-w-sm">
+            <p className="text-lg text-stone-500 dark:text-stone-400 max-w-sm">
               Rate ice cream stands, log your flavors, and discover the best spots near you.
             </p>
             <LogScoopButton onScoopLogged={() => setFeedKey((k) => k + 1)} />
@@ -59,7 +59,7 @@ export default function Home() {
         <ScoopFeed key={feedKey} />
       </main>
 
-      <footer className="border-t border-stone-100 py-6 text-center text-xs text-stone-400">
+      <footer className="border-t border-stone-100 dark:border-stone-800 py-6 text-center text-xs text-stone-400 dark:text-stone-500">
         Scoop Scoops — The Ice Cream Stand Guide
       </footer>
     </>

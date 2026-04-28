@@ -32,7 +32,7 @@ function ProgressDots({ step }: { step: number }) {
         <div
           key={s}
           className={`h-2 rounded-full transition-all duration-300 ${
-            s === step ? 'w-5 bg-rose-500' : s < step ? 'w-2 bg-rose-300' : 'w-2 bg-stone-200'
+            s === step ? 'w-5 bg-rose-500' : s < step ? 'w-2 bg-rose-300' : 'w-2 bg-stone-200 dark:bg-stone-700'
           }`}
         />
       ))}
@@ -57,7 +57,7 @@ function ModalNav({
         <button
           type="button"
           onClick={onBack}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium text-stone-600 hover:bg-stone-100 transition-colors"
+          className="px-5 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
         >
           Back
         </button>
@@ -163,16 +163,16 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Sheet */}
-      <div className="relative bg-white w-full sm:rounded-2xl sm:max-w-md max-h-[92dvh] overflow-y-auto shadow-2xl">
+      <div className="relative bg-white dark:bg-stone-900 w-full sm:rounded-2xl sm:max-w-md max-h-[92dvh] overflow-y-auto shadow-2xl">
         {submitted ? (
           <SuccessView stand={stand!} flavor={flavor} onClose={handleClose} />
         ) : (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
+            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100 dark:border-stone-800">
               <div>
-                <h2 className="font-bold text-stone-900 text-lg">Log a Scoop</h2>
-                <p className="text-xs text-stone-400 mt-0.5">
+                <h2 className="font-bold text-stone-900 dark:text-stone-100 text-lg">Log a Scoop</h2>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
                   {step === 1 ? 'Find your stand' : step === 2 ? 'What did you get?' : 'How was it?'}
                 </p>
               </div>
@@ -180,7 +180,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                 <ProgressDots step={step} />
                 <button
                   onClick={handleClose}
-                  className="text-stone-400 hover:text-stone-600 text-xl leading-none"
+                  className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-xl leading-none"
                   aria-label="Close"
                 >
                   ✕
@@ -191,7 +191,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
             <div className="px-6 py-5">
               {step === 1 && (
                 <div>
-                  <p className="text-sm text-stone-600 mb-4">
+                  <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">
                     Search for the ice cream stand you visited.
                   </p>
                   <StandSearch selected={stand} onSelect={setStand} />
@@ -203,7 +203,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                 <div className="flex flex-col gap-5">
                   {/* Flavor */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 block mb-1.5">
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
                       Flavor
                     </label>
                     <input
@@ -211,13 +211,13 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                       value={flavor}
                       onChange={(e) => setFlavor(e.target.value)}
                       placeholder="e.g. Strawberry Cheesecake"
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
                     />
                   </div>
 
                   {/* Size */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 block mb-1.5">Size</label>
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">Size</label>
                     <div className="flex gap-2 flex-wrap">
                       {SIZES.map(([value, label]) => (
                         <button
@@ -227,7 +227,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                             size === value
                               ? 'bg-rose-500 border-rose-500 text-white'
-                              : 'border-stone-300 text-stone-700 hover:border-rose-300 hover:text-rose-600'
+                              : 'border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-rose-300 hover:text-rose-600'
                           }`}
                         >
                           {label}
@@ -238,7 +238,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
                   {/* Container */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 block mb-1.5">
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
                       Cone or Speciality?
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -249,8 +249,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           onClick={() => setContainer(value)}
                           className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-medium transition-colors ${
                             container === value
-                              ? 'bg-rose-50 border-rose-400 text-rose-700'
-                              : 'border-stone-200 text-stone-600 hover:border-rose-200 hover:text-rose-600'
+                              ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-700 dark:text-rose-300'
+                              : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-rose-200 hover:text-rose-600'
                           }`}
                         >
                           <span className="text-xl">{emoji}</span>
@@ -262,8 +262,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
                   {/* Toppings */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 block mb-1.5">
-                      Toppings <span className="font-normal text-stone-400">(optional)</span>
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
+                      Toppings <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {TOPPINGS.map((t) => (
@@ -274,7 +274,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
                             toppings.includes(t)
                               ? 'bg-amber-400 border-amber-400 text-white'
-                              : 'border-stone-300 text-stone-600 hover:border-amber-300 hover:text-amber-700'
+                              : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-amber-300 hover:text-amber-700'
                           }`}
                         >
                           {t}
@@ -286,19 +286,19 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                   {/* Price */}
                   <div>
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <label className="text-sm font-medium text-stone-700">
-                        Price <span className="font-normal text-stone-400">(optional)</span>
+                      <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                        Price <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
                       </label>
                       <div className="relative group">
-                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 text-stone-500 text-xs cursor-default leading-none">?</span>
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 px-3 py-2 bg-stone-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400 text-xs cursor-default leading-none">?</span>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 px-3 py-2 bg-stone-800 dark:bg-stone-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
                           Enter whole dollar amounts only — no cents.
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-stone-800" />
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-stone-800 dark:border-t-stone-700" />
                         </div>
                       </div>
                     </div>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-sm">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500 text-sm">$</span>
                       <input
                         type="number"
                         min="0"
@@ -306,7 +306,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         placeholder="0"
-                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm"
+                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
                       />
                     </div>
                   </div>
@@ -334,15 +334,15 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     descriptors={VALUE_DESCRIPTORS}
                   />
                   <div>
-                    <label className="text-sm font-medium text-stone-700 block mb-1.5">
-                      Notes <span className="font-normal text-stone-400">(optional)</span>
+                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
+                      Notes <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
                     </label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Anything worth mentioning?"
                       rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 placeholder-stone-400 text-sm resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm resize-none"
                     />
                   </div>
                   {submitError && (
@@ -376,10 +376,10 @@ function SuccessView({
   return (
     <div className="flex flex-col items-center text-center px-8 py-12 gap-4">
       <div className="text-6xl">🍦</div>
-      <h2 className="text-2xl font-bold text-stone-900">Scoop logged!</h2>
-      <p className="text-stone-500 text-sm">
-        <span className="font-semibold text-stone-700">{flavor}</span> at{' '}
-        <span className="font-semibold text-stone-700">{stand.name}</span> — nice choice.
+      <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">Scoop logged!</h2>
+      <p className="text-stone-500 dark:text-stone-400 text-sm">
+        <span className="font-semibold text-stone-700 dark:text-stone-300">{flavor}</span> at{' '}
+        <span className="font-semibold text-stone-700 dark:text-stone-300">{stand.name}</span> — nice choice.
       </p>
       <button
         onClick={onClose}
