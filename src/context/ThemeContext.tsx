@@ -17,7 +17,7 @@ function applyTheme(theme: Theme) {
 function readTheme(): Theme {
   if (typeof window === 'undefined') return 'system';
   const v = localStorage.getItem('theme');
-  return v === 'light' || v === 'dark' || v === 'system' ? v : 'system';
+  return v === 'light' || v === 'dark' || v === 'system' ? v : 'light';
 }
 
 const ThemeContext = createContext<{

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 // Runs before hydration to prevent flash of wrong theme
 const themeScript = `
   try {
-    var t = localStorage.getItem('theme') || 'system';
+    var t = localStorage.getItem('theme') || 'light';
     var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if (dark) document.documentElement.classList.add('dark', 'theme-slate');
   } catch {}
