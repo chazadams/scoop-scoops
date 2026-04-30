@@ -1,18 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTheme, type DarkStyle } from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 type Theme = 'system' | 'light' | 'dark';
 const NEXT: Record<Theme, Theme> = { system: 'light', light: 'dark', dark: 'system' };
 const LABELS: Record<Theme, string> = { system: 'Auto', light: 'Light', dark: 'Dark' };
-
-const STYLES: { id: DarkStyle; label: string; bg: string; surface: string }[] = [
-  { id: 'cold',  label: 'Cold',  bg: '#0c0a09', surface: '#1c1917' },
-  { id: 'warm',  label: 'Warm',  bg: '#130d08', surface: '#1e1409' },
-  { id: 'slate', label: 'Slate', bg: '#020618', surface: '#0f1729' },
-  { id: 'soft',  label: 'Soft',  bg: '#1a1a1a', surface: '#252525' },
-];
 
 function SunIcon() {
   return (
@@ -51,44 +44,14 @@ const ICONS: Record<Theme, React.ReactNode> = {
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme, darkStyle, setDarkStyle } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => { setMounted(true); }, []);
 
   if (!mounted) return null;
 
-  const isDark = theme === 'dark' || theme === 'system';
-
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2">
-      {/* Dark style swatches — only visible when dark mode is active */}
-      {isDark && (
-        <div className="flex gap-1.5 p-2 rounded-2xl bg-white/10 dark:bg-black/30 backdrop-blur border border-white/20 dark:border-stone-700">
-          {STYLES.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setDarkStyle(s.id)}
-              title={s.label}
-              className="flex flex-col items-center gap-1 group"
-            >
-              {/* Swatch */}
-              <span
-                className="block w-7 h-7 rounded-lg border-2 transition-all"
-                style={{
-                  background: `linear-gradient(135deg, ${s.bg} 50%, ${s.surface} 50%)`,
-                  borderColor: darkStyle === s.id ? '#f43f5e' : 'transparent',
-                  boxShadow: darkStyle === s.id ? '0 0 0 1px #f43f5e' : 'none',
-                }}
-              />
-              <span className="text-[10px] text-white/60 group-hover:text-white/90 transition-colors leading-none">
-                {s.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Theme cycle button */}
+    <div className="fixed bottom-6 left-6 z-50">
       <button
         onClick={() => setTheme(NEXT[theme])}
         title={`Theme: ${LABELS[theme]} — click to cycle`}

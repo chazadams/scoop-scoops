@@ -17,13 +17,8 @@ export const metadata: Metadata = {
 const themeScript = `
   try {
     var t = localStorage.getItem('theme') || 'system';
-    var s = localStorage.getItem('darkStyle') || 'cold';
     var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (dark) {
-      document.documentElement.classList.add('dark');
-      var cls = {warm:'theme-warm',slate:'theme-slate',soft:'theme-soft'}[s];
-      if (cls) document.documentElement.classList.add(cls);
-    }
+    if (dark) document.documentElement.classList.add('dark', 'theme-slate');
   } catch {}
 `;
 
