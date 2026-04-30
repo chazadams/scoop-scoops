@@ -25,7 +25,7 @@ export default function LogScoopButton({ onScoopLogged }: { onScoopLogged?: () =
     <>
       <button
         onClick={handleClick}
-        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 text-white font-semibold text-base hover:bg-rose-600 active:scale-95 transition-all shadow-lg shadow-rose-200"
+        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 text-white font-semibold text-base hover:bg-rose-600 active:scale-95 transition-all shadow-lg shadow-rose-500/30"
       >
         <span>🍦</span>
         Log a Scoop
