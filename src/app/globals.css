@@ -23,6 +23,13 @@ html.dark {
   --color-stone-100: #e2eaf4;
 }
 
+/* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
+@media screen and (max-width: 767px) {
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
 /* SVG logo text adapts to dark theme */
 .dark .wordmark { fill: #e2eaf4; }
 .dark .tagline  { fill: #8a9db8; }
