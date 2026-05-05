@@ -65,11 +65,11 @@ export default function StandSearch({ selected, onSelect }: StandSearchProps) {
         className="w-full px-4 py-3 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
       />
       {selected && (
-        <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl px-3 py-2.5">
-          <span className="text-xl mt-0.5">🍦</span>
-          <div>
-            <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm">{selected.name}</p>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">{selected.address}</p>
+        <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 rounded-xl px-3 py-2.5 min-w-0">
+          <span className="text-xl mt-0.5 shrink-0">🍦</span>
+          <div className="min-w-0">
+            <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">{selected.name}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 break-words">{selected.address}</p>
           </div>
         </div>
       )}

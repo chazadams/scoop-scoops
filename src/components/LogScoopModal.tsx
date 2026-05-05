@@ -163,7 +163,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Sheet */}
-      <div className="relative bg-white dark:bg-stone-900 w-full sm:rounded-2xl sm:max-w-md max-h-[92dvh] overflow-y-auto shadow-2xl">
+      <div className="relative bg-white dark:bg-stone-900 w-full sm:rounded-2xl sm:max-w-md max-h-[92dvh] overflow-y-auto overflow-x-hidden shadow-2xl">
         {submitted ? (
           <SuccessView stand={stand!} flavor={flavor} onClose={handleClose} />
         ) : (
