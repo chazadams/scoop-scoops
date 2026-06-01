@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SIZE_LABELS, CONTAINER_LABELS } from '@/types/scoop';
+import { SIZE_LABELS, CONTAINER_LABELS, type Size } from '@/types/scoop';
 
 interface ReviewRow {
   id: string;
   flavor: string;
   size: string;
+  scoop_count: number | null;
   container: string;
   price: number | null;
   flavor_rating: number;
@@ -25,6 +26,7 @@ interface StandModalProps {
     avgFlavorRating: number;
     avgValueRating: number;
     lastReviewedAt: Date;
+    sizeScoop?: { size: string; avgScoops: number }[];
   } | null;
   initialView?: 'details' | 'reviews';
   onClose: () => void;
@@ -180,6 +182,21 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
               </div>
             </div>
 
+            {/* Size scoop summary */}
+            {stand.sizeScoop && stand.sizeScoop.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">Sizes</h3>
+                <ul className="flex flex-col gap-1">
+                  {stand.sizeScoop.map(({ size, avgScoops }) => (
+                    <li key={size} className="flex justify-between text-xs text-stone-600 dark:text-stone-400 px-2 py-1 rounded-lg bg-stone-50 dark:bg-stone-800">
+                      <span>{SIZE_LABELS[size as Size] ?? size}</span>
+                      <span className="font-medium text-stone-700 dark:text-stone-300">~{avgScoops} {avgScoops === 1 ? 'scoop' : 'scoops'}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             {/* Hours */}
             <div>
               <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">Hours</h3>
@@ -234,7 +251,8 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                     <div className="min-w-0">
                       <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm truncate">{r.flavor}</p>
                       <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-                        {sizeLabel} {containerInfo ? `· ${containerInfo.emoji} ${containerInfo.label}` : ''}
+                        {sizeLabel}{r.scoop_count != null ? ` · ${r.scoop_count} ${r.scoop_count === 1 ? 'scoop' : 'scoops'}` : ''}
+                        {containerInfo ? ` · ${containerInfo.emoji} ${containerInfo.label}` : ''}
                         {r.price != null ? ` · $${r.price.toFixed(2)}` : ''}
                       </p>
                     </div>

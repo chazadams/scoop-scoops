@@ -13,6 +13,7 @@ export async function GET(
       id,
       flavor,
       size,
+      scoop_count,
       container,
       price,
       flavor_rating,

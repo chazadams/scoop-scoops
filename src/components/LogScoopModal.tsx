@@ -57,7 +57,7 @@ function ModalNav({
         <button
           type="button"
           onClick={onBack}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+          className="px-5 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors touch-manipulation"
         >
           Back
         </button>
@@ -68,7 +68,7 @@ function ModalNav({
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors touch-manipulation"
       >
         {nextLabel}
       </button>
@@ -82,6 +82,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [stand, setStand] = useState<Stand | null>(null);
   const [flavor, setFlavor] = useState('');
   const [size, setSize] = useState<Size | null>(null);
+  const [scoopCount, setScoopCount] = useState<number | null>(null);
   const [container, setContainer] = useState<ContainerType | null>(null);
   const [toppings, setToppings] = useState<Topping[]>([]);
   const [price, setPrice] = useState('');
@@ -103,7 +104,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   if (!isOpen) return null;
 
   const reset = () => {
-    setStep(1); setStand(null); setFlavor(''); setSize(null);
+    setStep(1); setStand(null); setFlavor(''); setSize(null); setScoopCount(null);
     setContainer(null); setToppings([]); setPrice(''); setFlavorRating(0);
     setValueRating(0); setNotes(''); setSubmitted(false);
     setSubmitting(false); setSubmitError(null);
@@ -131,6 +132,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
           flavorRating,
           valueRating,
           notes,
+          scoopCount,
           userId: user.id,
         }),
       });
@@ -180,7 +182,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                 <ProgressDots step={step} />
                 <button
                   onClick={handleClose}
-                  className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-xl leading-none"
+                  className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-xl leading-none touch-manipulation"
                   aria-label="Close"
                 >
                   ✕
@@ -211,7 +213,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                       value={flavor}
                       onChange={(e) => setFlavor(e.target.value)}
                       placeholder="e.g. Strawberry Cheesecake"
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
                     />
                   </div>
 
@@ -223,8 +225,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         <button
                           key={value}
                           type="button"
-                          onClick={() => setSize(value)}
-                          className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                          onClick={() => { setSize(value); setScoopCount(null); }}
+                          className={`px-4 py-2.5 rounded-full text-sm font-medium border transition-colors touch-manipulation ${
                             size === value
                               ? 'bg-rose-500 border-rose-500 text-white'
                               : 'border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-rose-300 hover:text-rose-600'
@@ -234,6 +236,29 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         </button>
                       ))}
                     </div>
+                    {size && (
+                      <div className="mt-3">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mb-1.5">
+                          How many scoops? <span className="text-stone-400 dark:text-stone-500">(optional)</span>
+                        </p>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <button
+                              key={n}
+                              type="button"
+                              onClick={() => setScoopCount(scoopCount === n ? null : n)}
+                              className={`w-10 h-10 rounded-xl text-sm font-medium border transition-colors touch-manipulation ${
+                                scoopCount === n
+                                  ? 'bg-rose-500 border-rose-500 text-white'
+                                  : 'border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-rose-300 hover:text-rose-600'
+                              }`}
+                            >
+                              {n === 5 ? '5+' : n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Container */}
@@ -247,7 +272,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           key={value}
                           type="button"
                           onClick={() => setContainer(value)}
-                          className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-medium transition-colors ${
+                          className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-medium transition-colors touch-manipulation ${
                             container === value
                               ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-700 dark:text-rose-300'
                               : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-rose-200 hover:text-rose-600'
@@ -271,7 +296,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           key={t}
                           type="button"
                           onClick={() => toggleTopping(t)}
-                          className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                          className={`px-3 py-2 rounded-full text-xs font-medium border transition-colors touch-manipulation ${
                             toppings.includes(t)
                               ? 'bg-amber-400 border-amber-400 text-white'
                               : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-amber-300 hover:text-amber-700'
@@ -306,7 +331,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         placeholder="0"
-                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
                       />
                     </div>
                   </div>
@@ -342,7 +367,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Anything worth mentioning?"
                       rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base resize-none"
                     />
                   </div>
                   {submitError && (
@@ -383,7 +408,7 @@ function SuccessView({
       </p>
       <button
         onClick={onClose}
-        className="mt-4 px-8 py-3 rounded-xl bg-rose-500 text-white font-semibold hover:bg-rose-600 transition-colors"
+        className="mt-4 px-8 py-3 rounded-xl bg-rose-500 text-white font-semibold hover:bg-rose-600 transition-colors touch-manipulation"
       >
         Done
       </button>

@@ -26,19 +26,6 @@ export interface Stand {
   lng?: number;
 }
 
-export interface Scoop {
-  id: string;
-  stand: Stand;
-  flavor: string;
-  size: Size;
-  container: ContainerType;
-  price?: number;
-  toppings: Topping[];
-  flavorRating: number;
-  valueRating: number;
-  notes?: string;
-  createdAt: Date;
-}
 
 export const SIZE_LABELS: Record<Size, string> = {
   kids: 'Kids',

@@ -33,6 +33,7 @@ interface StandEntry {
   avgFlavorRating: number;
   avgValueRating: number;
   lastReviewedAt: Date;
+  sizeScoop: { size: string; avgScoops: number }[];
 }
 
 function toEntry(row: StandRow): StandEntry {
@@ -47,6 +48,7 @@ function toEntry(row: StandRow): StandEntry {
     avgFlavorRating: Number(row.avg_flavor_rating),
     avgValueRating: Number(row.avg_value_rating),
     lastReviewedAt: new Date(row.last_reviewed_at),
+    sizeScoop: (row as StandRow & { sizeScoop?: { size: string; avgScoops: number }[] }).sizeScoop ?? [],
   };
 }
 
@@ -64,7 +66,7 @@ const SORT_LABELS: Record<SortMode, string> = {
   nearest: 'Nearest',
 };
 
-export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
+export default function ScoopFeed() {
   const [stands, setStands] = useState<StandEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +95,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
     }
   }, []);
 
-  useEffect(() => { fetchStands(); }, [fetchStands, refreshKey]);
+  useEffect(() => { fetchStands(); }, [fetchStands]);
 
   // Focus zip input when switching to nearest mode
   useEffect(() => {
@@ -101,23 +103,26 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
   }, [sortMode]);
 
   const geocodeZip = useCallback(async () => {
-    if (!zipInput.trim()) return;
+    const zip = zipInput.trim();
+    if (!zip) return;
+    if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+      setGeoError('Enter a valid 5-digit zip code.');
+      return;
+    }
     setGeoError(null);
     setGeoLoading(true);
     try {
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: zipInput.trim() }, (results, status) => {
-        setGeoLoading(false);
-        if (status === 'OK' && results?.[0]) {
-          const loc = results[0].geometry.location;
-          setUserCoords({ lat: loc.lat(), lng: loc.lng() });
-        } else {
-          setGeoError('Zip code not found — try again.');
-        }
-      });
+      const res = await fetch(`/api/geocode?zip=${encodeURIComponent(zip)}`);
+      const data = await res.json();
+      if (res.ok) {
+        setUserCoords({ lat: data.lat, lng: data.lng });
+      } else {
+        setGeoError('Zip code not found — try again.');
+      }
     } catch {
+      setGeoError('Could not look up zip code.');
+    } finally {
       setGeoLoading(false);
-      setGeoError('Could not geocode zip code.');
     }
   }, [zipInput]);
 
@@ -134,7 +139,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
   });
 
   return (
-    <section className="max-w-5xl mx-auto px-4 py-10">
+    <section className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
       {/* Sort controls */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <div className="flex gap-2">
@@ -218,6 +223,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
                 avgValueRating={s.avgValueRating}
                 lastReviewedAt={s.lastReviewedAt}
                 distance={distance}
+                sizeScoop={s.sizeScoop}
                 onShopClick={() => { setSelectedStand(s); setModalView('details'); }}
                 onReviewClick={() => { setSelectedStand(s); setModalView('reviews'); }}
               />
@@ -236,6 +242,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
           avgFlavorRating: selectedStand.avgFlavorRating,
           avgValueRating: selectedStand.avgValueRating,
           lastReviewedAt: selectedStand.lastReviewedAt,
+          sizeScoop: selectedStand.sizeScoop,
         } : null}
         initialView={modalView}
         onClose={() => setSelectedStand(null)}
