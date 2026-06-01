@@ -1,31 +1,5 @@
 import { supabase } from '@/lib/supabase';
 
-export async function GET() {
-  const { data, error } = await supabase
-    .from('scoops')
-    .select(`
-      id,
-      flavor,
-      size,
-      container,
-      price,
-      toppings,
-      flavor_rating,
-      value_rating,
-      notes,
-      created_at,
-      stands ( id, place_id, name, address )
-    `)
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
-
-  return Response.json(data);
-}
-
 export async function POST(request: Request) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'your_supabase_url_here') {
     return Response.json({ error: 'Supabase is not configured yet' }, { status: 503 });

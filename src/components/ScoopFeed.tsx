@@ -66,7 +66,7 @@ const SORT_LABELS: Record<SortMode, string> = {
   nearest: 'Nearest',
 };
 
-export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
+export default function ScoopFeed() {
   const [stands, setStands] = useState<StandEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +95,7 @@ export default function ScoopFeed({ refreshKey }: { refreshKey?: number }) {
     }
   }, []);
 
-  useEffect(() => { fetchStands(); }, [fetchStands, refreshKey]);
+  useEffect(() => { fetchStands(); }, [fetchStands]);
 
   // Focus zip input when switching to nearest mode
   useEffect(() => {
