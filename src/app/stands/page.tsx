@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import StandsList from '@/components/StandsList';
+import Footer from '@/components/Footer';
 
 export const metadata = { title: 'Stands — Scoop Scoops' };
 
@@ -14,9 +15,7 @@ export default function StandsPage() {
         </div>
         <StandsList />
       </main>
-      <footer className="border-t border-stone-100 dark:border-stone-800 py-6 text-center text-xs text-stone-400 dark:text-stone-500">
-        Scoop Scoops — The Ice Cream Stand Guide
-      </footer>
+      <Footer />
     </>
   );
 }

@@ -20,10 +20,10 @@ export default function Header() {
           {!loading && !user && (
             <button
               onClick={signInWithGoogle}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 dark:border-stone-700 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors touch-manipulation"
             >
               <GoogleIcon />
-              Sign in
+              Sign in with Google
             </button>
           )}
           {!loading && user && (
@@ -36,7 +36,7 @@ export default function Header() {
               </div>
               <button
                 onClick={signOut}
-                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors touch-manipulation"
               >
                 Sign out
               </button>

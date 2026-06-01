@@ -51,11 +51,11 @@ export default function ThemeToggle() {
   if (!mounted) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 z-50">
+    <div className="fixed bottom-6 left-6 z-40">
       <button
         onClick={() => setTheme(NEXT[theme])}
         title={`Theme: ${LABELS[theme]} — click to cycle`}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
+        className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 shadow-md text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors touch-manipulation"
       >
         {ICONS[theme]}
         <span>{LABELS[theme]}</span>
