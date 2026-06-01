@@ -1,3 +1,5 @@
+import { SIZE_LABELS, type Size } from '@/types/scoop';
+
 interface StandCardProps {
   name: string;
   address: string;
@@ -6,6 +8,7 @@ interface StandCardProps {
   avgValueRating: number;
   lastReviewedAt: Date;
   distance?: number | null;
+  sizeScoop?: { size: string; avgScoops: number }[];
   onShopClick?: () => void;
   onReviewClick?: () => void;
 }
@@ -35,9 +38,12 @@ export default function StandCard({
   avgValueRating,
   lastReviewedAt,
   distance,
+  sizeScoop,
   onShopClick,
   onReviewClick,
 }: StandCardProps) {
+  const topSize = sizeScoop?.[0];
+
   return (
     <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col">
       {/* Stand header — click for shop details */}
@@ -93,6 +99,14 @@ export default function StandCard({
               <span className="text-stone-400 dark:text-stone-500">{avgValueRating.toFixed(1)}</span>
             </div>
           </div>
+          {topSize && (
+            <div className="flex items-center justify-between text-xs text-stone-500 dark:text-stone-400 pt-1 mt-0.5 border-t border-stone-50 dark:border-stone-800">
+              <span>Avg order</span>
+              <span className="text-stone-600 dark:text-stone-300 font-medium">
+                {SIZE_LABELS[topSize.size as Size] ?? topSize.size} · ~{topSize.avgScoops} {topSize.avgScoops === 1 ? 'scoop' : 'scoops'}
+              </span>
+            </div>
+          )}
         </div>
       </button>
     </div>

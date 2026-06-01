@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import StandModal from './StandModal';
+import { SIZE_LABELS, type Size } from '@/types/scoop';
 
 type SortMode = 'today' | 'recent' | 'most-reviews' | 'nearest';
 
@@ -32,6 +33,7 @@ interface StandEntry {
   avgFlavorRating: number;
   avgValueRating: number;
   lastReviewedAt: Date;
+  sizeScoop: { size: string; avgScoops: number }[];
 }
 
 function toEntry(row: StandRow): StandEntry {
@@ -46,6 +48,7 @@ function toEntry(row: StandRow): StandEntry {
     avgFlavorRating: Number(row.avg_flavor_rating),
     avgValueRating: Number(row.avg_value_rating),
     lastReviewedAt: new Date(row.last_reviewed_at),
+    sizeScoop: (row as StandRow & { sizeScoop?: { size: string; avgScoops: number }[] }).sizeScoop ?? [],
   };
 }
 
@@ -125,23 +128,26 @@ export default function StandsList() {
   }, [sortMode]);
 
   const geocodeZip = useCallback(async () => {
-    if (!zipInput.trim()) return;
+    const zip = zipInput.trim();
+    if (!zip) return;
+    if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+      setGeoError('Enter a valid 5-digit zip code.');
+      return;
+    }
     setGeoError(null);
     setGeoLoading(true);
     try {
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: zipInput.trim() }, (results, status) => {
-        setGeoLoading(false);
-        if (status === 'OK' && results?.[0]) {
-          const loc = results[0].geometry.location;
-          setUserCoords({ lat: loc.lat(), lng: loc.lng() });
-        } else {
-          setGeoError('Zip code not found — try again.');
-        }
-      });
+      const res = await fetch(`/api/geocode?zip=${encodeURIComponent(zip)}`);
+      const data = await res.json();
+      if (res.ok) {
+        setUserCoords({ lat: data.lat, lng: data.lng });
+      } else {
+        setGeoError('Zip code not found — try again.');
+      }
     } catch {
+      setGeoError('Could not look up zip code.');
+    } finally {
       setGeoLoading(false);
-      setGeoError('Could not geocode zip code.');
     }
   }, [zipInput]);
 
@@ -254,7 +260,7 @@ export default function StandsList() {
                       <span className="text-xs text-stone-400 dark:text-stone-500">{s.totalScoops} {s.totalScoops === 1 ? 'review' : 'reviews'}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 mt-2">
+                  <div className="flex items-center gap-4 mt-2 flex-wrap">
                     <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
                       <span>Flavor</span>
                       <Stars rating={s.avgFlavorRating} />
@@ -265,6 +271,14 @@ export default function StandsList() {
                       <Stars rating={s.avgValueRating} />
                       <span className="text-stone-400 dark:text-stone-500">{s.avgValueRating.toFixed(1)}</span>
                     </div>
+                    {s.sizeScoop[0] && (
+                      <div className="text-xs text-stone-500 dark:text-stone-400">
+                        <span>Avg: </span>
+                        <span className="font-medium text-stone-600 dark:text-stone-300">
+                          {SIZE_LABELS[s.sizeScoop[0].size as Size] ?? s.sizeScoop[0].size} · ~{s.sizeScoop[0].avgScoops} {s.sizeScoop[0].avgScoops === 1 ? 'scoop' : 'scoops'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </button>
               </li>
@@ -283,6 +297,7 @@ export default function StandsList() {
           avgFlavorRating: selectedStand.avgFlavorRating,
           avgValueRating: selectedStand.avgValueRating,
           lastReviewedAt: selectedStand.lastReviewedAt,
+          sizeScoop: selectedStand.sizeScoop,
         } : null}
         onClose={() => setSelectedStand(null)}
       />

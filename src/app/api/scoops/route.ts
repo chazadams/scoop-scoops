@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId } = body;
+  const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId, scoopCount } = body;
 
   // Upsert the stand by place_id so we don't create duplicates
   const { data: standRow, error: standError } = await supabase
@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       flavor_rating: flavorRating,
       value_rating: valueRating,
       notes: notes ?? null,
+      scoop_count: scoopCount ?? null,
     })
     .select('id')
     .single();
