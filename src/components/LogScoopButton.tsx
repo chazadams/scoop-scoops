@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function LogScoopButton({ onScoopLogged }: { onScoopLogged?: () => void }) {
   const [open, setOpen] = useState(false);
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
 
   const handleClick = () => {
     if (!user) {
@@ -25,7 +25,8 @@ export default function LogScoopButton({ onScoopLogged }: { onScoopLogged?: () =
     <>
       <button
         onClick={handleClick}
-        className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 text-white font-semibold text-base hover:bg-rose-600 active:scale-95 transition-all shadow-lg shadow-rose-500/30"
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg bg-brand text-white font-bold text-sm tracking-wide uppercase hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-50 touch-manipulation"
       >
         <span>🍦</span>
         Log a Scoop

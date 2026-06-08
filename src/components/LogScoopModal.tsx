@@ -31,8 +31,8 @@ function ProgressDots({ step }: { step: number }) {
       {[1, 2, 3].map((s) => (
         <div
           key={s}
-          className={`h-2 rounded-full transition-all duration-300 ${
-            s === step ? 'w-5 bg-rose-500' : s < step ? 'w-2 bg-rose-300' : 'w-2 bg-stone-200 dark:bg-stone-700'
+          className={`h-1.5 rounded-full transition-all duration-300 ${
+            s === step ? 'w-5 bg-brand' : s < step ? 'w-1.5 bg-brand/40' : 'w-1.5 bg-stone-200 dark:bg-stone-700'
           }`}
         />
       ))}
@@ -57,7 +57,7 @@ function ModalNav({
         <button
           type="button"
           onClick={onBack}
-          className="px-5 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors touch-manipulation"
+          className="px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide uppercase text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors touch-manipulation"
         >
           Back
         </button>
@@ -68,7 +68,7 @@ function ModalNav({
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-rose-500 text-white hover:bg-rose-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors touch-manipulation"
+        className="px-6 py-2.5 rounded-lg text-xs font-bold tracking-wide uppercase bg-brand text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation"
       >
         {nextLabel}
       </button>
@@ -165,24 +165,24 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Sheet */}
-      <div className="relative bg-white dark:bg-stone-900 w-full sm:rounded-2xl sm:max-w-md max-h-[92dvh] overflow-y-auto overflow-x-hidden shadow-2xl">
+      <div className="relative bg-white dark:bg-stone-900 w-full sm:rounded-lg sm:max-w-md max-h-[92dvh] overflow-y-auto overflow-x-hidden shadow-2xl">
         {submitted ? (
           <SuccessView stand={stand!} flavor={flavor} onClose={handleClose} />
         ) : (
           <>
             {/* Header */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100 dark:border-stone-800">
+            <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-stone-100 dark:border-stone-800">
               <div>
-                <h2 className="font-bold text-stone-900 dark:text-stone-100 text-lg">Log a Scoop</h2>
-                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-                  {step === 1 ? 'Find your stand' : step === 2 ? 'What did you get?' : 'How was it?'}
+                <h2 className="font-bold text-stone-900 dark:text-stone-100 text-base tracking-tight">Log a Scoop</h2>
+                <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mt-0.5">
+                  {step === 1 ? 'Step 1 — Find your stand' : step === 2 ? 'Step 2 — What did you get?' : 'Step 3 — How was it?'}
                 </p>
               </div>
               <div className="flex items-center gap-4">
                 <ProgressDots step={step} />
                 <button
                   onClick={handleClose}
-                  className="text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 text-xl leading-none touch-manipulation"
+                  className="text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 text-xl leading-none touch-manipulation"
                   aria-label="Close"
                 >
                   ✕
@@ -190,11 +190,11 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
               </div>
             </div>
 
-            <div className="px-6 py-5">
+            <div className="px-5 py-5">
               {step === 1 && (
                 <div>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">
-                    Search for the ice cream stand you visited.
+                  <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-4">
+                    Search for the stand you visited
                   </p>
                   <StandSearch selected={stand} onSelect={setStand} />
                   <ModalNav onNext={() => setStep(2)} nextDisabled={!stand} />
@@ -205,7 +205,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                 <div className="flex flex-col gap-5">
                   {/* Flavor */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
+                    <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">
                       Flavor
                     </label>
                     <input
@@ -213,23 +213,23 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                       value={flavor}
                       onChange={(e) => setFlavor(e.target.value)}
                       placeholder="e.g. Strawberry Cheesecake"
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
+                      className="w-full px-4 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
                     />
                   </div>
 
                   {/* Size */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">Size</label>
+                    <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">Size</label>
                     <div className="flex gap-2 flex-wrap">
                       {SIZES.map(([value, label]) => (
                         <button
                           key={value}
                           type="button"
                           onClick={() => { setSize(value); setScoopCount(null); }}
-                          className={`px-4 py-2.5 rounded-full text-sm font-medium border transition-colors touch-manipulation ${
+                          className={`px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors touch-manipulation ${
                             size === value
-                              ? 'bg-rose-500 border-rose-500 text-white'
-                              : 'border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-rose-300 hover:text-rose-600'
+                              ? 'bg-brand border-brand text-white'
+                              : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-brand hover:text-brand'
                           }`}
                         >
                           {label}
@@ -238,8 +238,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     </div>
                     {size && (
                       <div className="mt-3">
-                        <p className="text-xs text-stone-500 dark:text-stone-400 mb-1.5">
-                          How many scoops? <span className="text-stone-400 dark:text-stone-500">(optional)</span>
+                        <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-1.5">
+                          How many scoops? <span className="font-normal normal-case">(optional)</span>
                         </p>
                         <div className="flex gap-2">
                           {[1, 2, 3, 4, 5].map((n) => (
@@ -247,10 +247,10 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                               key={n}
                               type="button"
                               onClick={() => setScoopCount(scoopCount === n ? null : n)}
-                              className={`w-10 h-10 rounded-xl text-sm font-medium border transition-colors touch-manipulation ${
+                              className={`w-11 h-11 rounded-lg text-sm font-bold border transition-colors touch-manipulation ${
                                 scoopCount === n
-                                  ? 'bg-rose-500 border-rose-500 text-white'
-                                  : 'border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:border-rose-300 hover:text-rose-600'
+                                  ? 'bg-brand border-brand text-white'
+                                  : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-brand hover:text-brand'
                               }`}
                             >
                               {n === 5 ? '5+' : n}
@@ -263,7 +263,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
                   {/* Container */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
+                    <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">
                       Cone or Speciality?
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -272,10 +272,10 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           key={value}
                           type="button"
                           onClick={() => setContainer(value)}
-                          className={`flex flex-col items-center gap-1 py-3 rounded-xl border text-xs font-medium transition-colors touch-manipulation ${
+                          className={`flex flex-col items-center gap-1 py-3 rounded-lg border text-xs font-semibold transition-colors touch-manipulation ${
                             container === value
-                              ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-400 text-rose-700 dark:text-rose-300'
-                              : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-rose-200 hover:text-rose-600'
+                              ? 'bg-brand/8 border-brand text-brand dark:text-brand'
+                              : 'border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-brand hover:text-brand'
                           }`}
                         >
                           <span className="text-xl">{emoji}</span>
@@ -287,8 +287,8 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
                   {/* Toppings */}
                   <div>
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
-                      Toppings <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
+                    <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">
+                      Toppings <span className="font-normal normal-case">(optional)</span>
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {TOPPINGS.map((t) => (
@@ -296,10 +296,10 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           key={t}
                           type="button"
                           onClick={() => toggleTopping(t)}
-                          className={`px-3 py-2 rounded-full text-xs font-medium border transition-colors touch-manipulation ${
+                          className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors touch-manipulation ${
                             toppings.includes(t)
-                              ? 'bg-amber-400 border-amber-400 text-white'
-                              : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-amber-300 hover:text-amber-700'
+                              ? 'bg-brand border-brand text-white'
+                              : 'border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-brand hover:text-brand'
                           }`}
                         >
                           {t}
@@ -311,14 +311,14 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                   {/* Price */}
                   <div>
                     <div className="flex items-center gap-1.5 mb-1.5">
-                      <label className="text-sm font-medium text-stone-700 dark:text-stone-300">
-                        Price <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
+                      <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500">
+                        Price <span className="font-normal normal-case">(optional)</span>
                       </label>
                       <div className="relative group">
-                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400 text-xs cursor-default leading-none">?</span>
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 px-3 py-2 bg-stone-800 dark:bg-stone-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 text-xs cursor-default leading-none">?</span>
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-44 px-3 py-2 bg-stone-900 dark:bg-stone-700 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
                           Enter whole dollar amounts only — no cents.
-                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-stone-800 dark:border-t-stone-700" />
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-stone-900 dark:border-t-stone-700" />
                         </div>
                       </div>
                     </div>
@@ -331,7 +331,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                         placeholder="0"
-                        className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
+                        className="w-full pl-7 pr-4 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base"
                       />
                     </div>
                   </div>
@@ -359,15 +359,15 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     descriptors={VALUE_DESCRIPTORS}
                   />
                   <div>
-                    <label className="text-sm font-medium text-stone-700 dark:text-stone-300 block mb-1.5">
-                      Notes <span className="font-normal text-stone-400 dark:text-stone-500">(optional)</span>
+                    <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">
+                      Notes <span className="font-normal normal-case">(optional)</span>
                     </label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Anything worth mentioning?"
                       rows={3}
-                      className="w-full px-4 py-2.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base resize-none"
+                      className="w-full px-4 py-2.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-base resize-none"
                     />
                   </div>
                   {submitError && (
@@ -408,7 +408,7 @@ function SuccessView({
       </p>
       <button
         onClick={onClose}
-        className="mt-4 px-8 py-3 rounded-xl bg-rose-500 text-white font-semibold hover:bg-rose-600 transition-colors touch-manipulation"
+        className="mt-4 px-8 py-3 rounded-lg bg-brand text-white font-bold uppercase tracking-wide text-xs hover:opacity-90 transition-colors touch-manipulation"
       >
         Done
       </button>

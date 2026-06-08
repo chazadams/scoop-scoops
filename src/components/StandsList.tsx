@@ -76,15 +76,6 @@ function timeAgo(date: Date): string {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function Stars({ rating }: { rating: number }) {
-  return (
-    <span>
-      {[1, 2, 3, 4, 5].map((s) => (
-        <span key={s} className={s <= Math.round(rating) ? 'text-amber-400' : 'text-stone-200 dark:text-stone-700'}>★</span>
-      ))}
-    </span>
-  );
-}
 
 const SORT_LABELS: Record<SortMode, string> = {
   today: 'Today',
@@ -167,18 +158,18 @@ export default function StandsList() {
   });
 
   return (
-    <section className="max-w-2xl mx-auto px-4 py-10">
-      {/* Sort controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-        <div className="flex gap-2 flex-wrap">
+    <section className="bg-stone-50 dark:bg-stone-950 min-h-full">
+      {/* Sort tab bar */}
+      <div className="bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
+        <div className="max-w-2xl mx-auto px-4 flex items-center overflow-x-auto">
           {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setSortMode(mode)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              className={`px-4 py-3.5 text-xs font-bold tracking-[0.08em] uppercase whitespace-nowrap border-b-2 transition-colors ${
                 sortMode === mode
-                  ? 'bg-rose-500 border-rose-500 text-white'
-                  : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-rose-300 hover:text-rose-600'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
               }`}
             >
               {SORT_LABELS[mode]}
@@ -187,7 +178,7 @@ export default function StandsList() {
         </div>
 
         {sortMode === 'nearest' && (
-          <div className="flex items-center gap-2">
+          <div className="max-w-2xl mx-auto px-4 pb-3 flex items-center gap-2">
             <input
               ref={zipRef}
               type="text"
@@ -195,12 +186,12 @@ export default function StandsList() {
               onChange={(e) => { setZipInput(e.target.value); setUserCoords(null); setGeoError(null); }}
               onKeyDown={(e) => { if (e.key === 'Enter') geocodeZip(); }}
               placeholder="Enter zip code"
-              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+              className="w-36 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
             />
             <button
               onClick={geocodeZip}
               disabled={!zipInput.trim() || geoLoading}
-              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-40 transition-colors"
+              className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
             >
               {geoLoading ? '…' : 'Go'}
             </button>
@@ -210,6 +201,7 @@ export default function StandsList() {
         )}
       </div>
 
+      <div className="max-w-2xl mx-auto px-4 py-6">
       {loading && (
         <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
       )}
@@ -217,7 +209,7 @@ export default function StandsList() {
       {error && (
         <div className="text-center py-16">
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
-          <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">Try again</button>
+          <button onClick={fetchStands} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">Try again</button>
         </div>
       )}
 
@@ -240,18 +232,18 @@ export default function StandsList() {
                 <button
                   type="button"
                   onClick={() => setSelectedStand(s)}
-                  className="w-full text-left py-4 px-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-colors group"
+                  className="w-full text-left py-4 hover:bg-white dark:hover:bg-stone-800/60 transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors truncate">
+                      <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm group-hover:text-brand transition-colors truncate">
                         {s.name}
                       </p>
                       <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 truncate">{s.address}</p>
                     </div>
                     <div className="shrink-0 flex flex-col items-end gap-1">
                       {distance != null ? (
-                        <span className="text-xs font-medium text-rose-500 bg-rose-50 border border-rose-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">
                           {distance.toFixed(1)} mi
                         </span>
                       ) : (
@@ -260,21 +252,25 @@ export default function StandsList() {
                       <span className="text-xs text-stone-400 dark:text-stone-500">{s.totalScoops} {s.totalScoops === 1 ? 'review' : 'reviews'}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 mt-2 flex-wrap">
-                    <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
-                      <span>Flavor</span>
-                      <Stars rating={s.avgFlavorRating} />
-                      <span className="text-stone-400 dark:text-stone-500">{s.avgFlavorRating.toFixed(1)}</span>
+                  <div className="flex items-center gap-4 mt-2.5 flex-wrap">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500">Flavor</span>
+                      <div className="w-16 h-1 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-brand rounded-full" style={{ width: `${(s.avgFlavorRating / 5) * 100}%` }} />
+                      </div>
+                      <span className="font-bold text-stone-700 dark:text-stone-200 tabular-nums">{s.avgFlavorRating.toFixed(1)}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
-                      <span>Value</span>
-                      <Stars rating={s.avgValueRating} />
-                      <span className="text-stone-400 dark:text-stone-500">{s.avgValueRating.toFixed(1)}</span>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500">Value</span>
+                      <div className="w-16 h-1 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">
+                        <div className="h-full bg-brand rounded-full" style={{ width: `${(s.avgValueRating / 5) * 100}%` }} />
+                      </div>
+                      <span className="font-bold text-stone-700 dark:text-stone-200 tabular-nums">{s.avgValueRating.toFixed(1)}</span>
                     </div>
                     {s.sizeScoop[0] && (
-                      <div className="text-xs text-stone-500 dark:text-stone-400">
-                        <span>Avg: </span>
-                        <span className="font-medium text-stone-600 dark:text-stone-300">
+                      <div className="text-xs">
+                        <span className="font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500">Avg: </span>
+                        <span className="font-bold text-stone-700 dark:text-stone-200">
                           {SIZE_LABELS[s.sizeScoop[0].size as Size] ?? s.sizeScoop[0].size} · ~{s.sizeScoop[0].avgScoops} {s.sizeScoop[0].avgScoops === 1 ? 'scoop' : 'scoops'}
                         </span>
                       </div>
@@ -301,6 +297,7 @@ export default function StandsList() {
         } : null}
         onClose={() => setSelectedStand(null)}
       />
+      </div>
     </section>
   );
 }
