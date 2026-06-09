@@ -6,21 +6,22 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-brand: #FF3355;
 }
 
-/* ─── Dark theme: Slate ───────────────────────────────────────────
-   Blue-tinted darks. Crisp, modern, high contrast. */
+/* Dark mode: charcoal neutrals */
 html.dark {
-  --color-stone-950: #020618;
-  --color-stone-900: #0f1729;
-  --color-stone-800: #1d2a42;
-  --color-stone-700: #2d3f5f;
-  --color-stone-600: #415572;
-  --color-stone-500: #596b88;
-  --color-stone-400: #7a8fa8;
-  --color-stone-300: #9db0c8;
-  --color-stone-200: #c0cfde;
-  --color-stone-100: #e2eaf4;
+  --color-stone-950: #0A0A0A;
+  --color-stone-900: #111111;
+  --color-stone-800: #1C1C1C;
+  --color-stone-700: #2A2A2A;
+  --color-stone-600: #3D3D3D;
+  --color-stone-500: #666666;
+  --color-stone-400: #888888;
+  --color-stone-300: #AAAAAA;
+  --color-stone-200: #CCCCCC;
+  --color-stone-100: #E3E3E3;
+  --color-stone-50:  #F5F5F5;
 }
 
 /* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
@@ -29,7 +30,3 @@ html.dark {
     font-size: 16px;
   }
 }
-
-/* SVG logo text adapts to dark theme */
-.dark .wordmark { fill: #e2eaf4; }
-.dark .tagline  { fill: #8a9db8; }

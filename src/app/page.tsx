@@ -6,7 +6,6 @@ import ScoopFeed from '@/components/ScoopFeed';
 import LogScoopButton from '@/components/LogScoopButton';
 import Footer from '@/components/Footer';
 
-
 export default function Home() {
   const [feedKey, setFeedKey] = useState(0);
 
@@ -14,19 +13,13 @@ export default function Home() {
     <>
       <Header />
       <main className="flex-1">
-        {/* Hero */}
-        <section className="bg-gradient-to-b from-rose-50 via-amber-50 to-stone-50 dark:from-rose-950/20 dark:via-stone-900 dark:to-stone-900 py-8 sm:py-20 px-4 text-center">
-          <div className="max-w-xl mx-auto flex flex-col items-center gap-3 sm:gap-5">
-            <p className="hidden sm:block text-lg text-stone-500 dark:text-stone-400 max-w-sm">
-              Rate ice cream stands, log your flavors, and discover the best spots near you.
-            </p>
+        <div className="bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 px-4 py-4">
+          <div className="max-w-5xl mx-auto">
             <LogScoopButton onScoopLogged={() => setFeedKey((k) => k + 1)} />
           </div>
-        </section>
-
+        </div>
         <ScoopFeed key={feedKey} />
       </main>
-
       <Footer />
     </>
   );

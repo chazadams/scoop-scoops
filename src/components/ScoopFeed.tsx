@@ -139,18 +139,18 @@ export default function ScoopFeed() {
   });
 
   return (
-    <section className="max-w-5xl mx-auto px-4 py-6 sm:py-10">
-      {/* Sort controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
-        <div className="flex gap-2">
+    <section className="bg-stone-50 dark:bg-stone-950 min-h-full">
+      {/* Sort tab bar */}
+      <div className="bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800">
+        <div className="max-w-5xl mx-auto px-4 flex items-center gap-0 overflow-x-auto">
           {(Object.keys(SORT_LABELS) as SortMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => setSortMode(mode)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              className={`px-4 py-3.5 text-xs font-bold tracking-[0.08em] uppercase whitespace-nowrap border-b-2 transition-colors ${
                 sortMode === mode
-                  ? 'bg-rose-500 border-rose-500 text-white'
-                  : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-rose-300 hover:text-rose-600'
+                  ? 'border-brand text-brand'
+                  : 'border-transparent text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
               }`}
             >
               {SORT_LABELS[mode]}
@@ -158,9 +158,8 @@ export default function ScoopFeed() {
           ))}
         </div>
 
-        {/* Zip input — only shown in nearest mode */}
         {sortMode === 'nearest' && (
-          <div className="flex items-center gap-2">
+          <div className="max-w-5xl mx-auto px-4 pb-3 flex items-center gap-2">
             <input
               ref={zipRef}
               type="text"
@@ -168,23 +167,22 @@ export default function ScoopFeed() {
               onChange={(e) => { setZipInput(e.target.value); setUserCoords(null); setGeoError(null); }}
               onKeyDown={(e) => { if (e.key === 'Enter') geocodeZip(); }}
               placeholder="Enter zip code"
-              className="w-36 px-3 py-1.5 rounded-xl border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-400 text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+              className="w-36 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
             />
             <button
               onClick={geocodeZip}
               disabled={!zipInput.trim() || geoLoading}
-              className="px-3 py-1.5 rounded-xl text-sm font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 disabled:opacity-40 transition-colors"
+              className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
             >
               {geoLoading ? '…' : 'Go'}
             </button>
             {geoError && <p className="text-xs text-red-500">{geoError}</p>}
-            {userCoords && !geoError && (
-              <p className="text-xs text-stone-400">Sorted by distance</p>
-            )}
+            {userCoords && !geoError && <p className="text-xs text-stone-400">Sorted by distance</p>}
           </div>
         )}
       </div>
 
+      <div className="max-w-5xl mx-auto px-4 py-6">
       {loading && (
         <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
       )}
@@ -192,7 +190,7 @@ export default function ScoopFeed() {
       {error && (
         <div className="text-center py-16">
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
-          <button onClick={fetchStands} className="text-sm text-rose-500 hover:text-rose-600 font-medium">
+          <button onClick={fetchStands} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">
             Try again
           </button>
         </div>
@@ -247,6 +245,7 @@ export default function ScoopFeed() {
         initialView={modalView}
         onClose={() => setSelectedStand(null)}
       />
+      </div>
     </section>
   );
 }

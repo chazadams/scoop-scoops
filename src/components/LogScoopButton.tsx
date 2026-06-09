@@ -23,21 +23,14 @@ export default function LogScoopButton({ onScoopLogged }: { onScoopLogged?: () =
 
   return (
     <>
-      <div className="flex flex-col items-center gap-1.5">
-        <button
-          onClick={handleClick}
-          disabled={loading}
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-rose-500 text-white font-semibold text-base hover:bg-rose-600 active:scale-95 transition-all shadow-lg shadow-rose-500/30 disabled:opacity-50 touch-manipulation"
-        >
-          <span>🍦</span>
-          Log a Scoop
-        </button>
-        {!loading && !user && (
-          <p className="text-xs text-stone-400 dark:text-stone-500">
-            Continues to Google sign-in
-          </p>
-        )}
-      </div>
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg bg-brand text-white font-bold text-sm tracking-wide uppercase hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-50 touch-manipulation"
+      >
+        <span>🍦</span>
+        Log a Scoop
+      </button>
       <LogScoopModal isOpen={open} onClose={handleClose} />
     </>
   );
