@@ -159,51 +159,37 @@ export default function StandsList() {
           ))}
         </div>
 
-        {sortMode === 'nearest' && (
+        {sortMode === 'nearest' && !coords && (
           <div className="max-w-2xl mx-auto px-4 pb-3">
-            {coords ? (
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-stone-500 dark:text-stone-400">
-                  📍 {cityState ?? (source === 'gps' ? 'Using your location' : 'Location set')}
-                </span>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={clear}
-                  className="text-brand hover:opacity-70 font-semibold transition-opacity"
+                  onClick={requestGPS}
+                  disabled={geoLoading}
+                  className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-brand text-white hover:opacity-90 disabled:opacity-40 transition-colors"
                 >
-                  Change
+                  {geoLoading ? '…' : '📍 Use my location'}
+                </button>
+                <span className="text-xs text-stone-400 dark:text-stone-500">or</span>
+                <input
+                  ref={zipRef}
+                  type="text"
+                  value={zipInput}
+                  onChange={(e) => setZipInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleZipSubmit(); }}
+                  placeholder="Enter zip code"
+                  className="w-32 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+                />
+                <button
+                  onClick={handleZipSubmit}
+                  disabled={!zipInput.trim() || geoLoading}
+                  className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
+                >
+                  {geoLoading ? '…' : 'Go'}
                 </button>
               </div>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={requestGPS}
-                    disabled={geoLoading}
-                    className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-brand text-white hover:opacity-90 disabled:opacity-40 transition-colors"
-                  >
-                    {geoLoading ? '…' : '📍 Use my location'}
-                  </button>
-                  <span className="text-xs text-stone-400 dark:text-stone-500">or</span>
-                  <input
-                    ref={zipRef}
-                    type="text"
-                    value={zipInput}
-                    onChange={(e) => setZipInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleZipSubmit(); }}
-                    placeholder="Enter zip code"
-                    className="w-32 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
-                  />
-                  <button
-                    onClick={handleZipSubmit}
-                    disabled={!zipInput.trim() || geoLoading}
-                    className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
-                  >
-                    {geoLoading ? '…' : 'Go'}
-                  </button>
-                </div>
-                {geoError && <p className="text-xs text-red-500">{geoError}</p>}
-              </div>
-            )}
+              {geoError && <p className="text-xs text-red-500">{geoError}</p>}
+            </div>
           </div>
         )}
       </div>
@@ -229,10 +215,9 @@ export default function StandsList() {
         {!loading && !error && sorted.length > 0 && (
           <ul className="flex flex-col divide-y divide-stone-100 dark:divide-stone-800">
             {sorted.map((s) => {
-              const distance =
-                sortMode === 'nearest' && coords && s.lat != null && s.lng != null
-                  ? haversine(coords.lat, coords.lng, s.lat, s.lng)
-                  : null;
+              const distance = coords && s.lat != null && s.lng != null
+                ? haversine(coords.lat, coords.lng, s.lat, s.lng)
+                : null;
               const visited = visitedStandIds.has(s.standId);
 
               return (
