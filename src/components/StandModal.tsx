@@ -76,7 +76,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
     fetch(`/api/places/${encodeURIComponent(stand.placeId)}`)
       .then((r) => r.json())
       .then((data) => setHours(data.hours ?? null))
-      .catch(() => setHours(null))
+      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHours(null); })
       .finally(() => setHoursLoading(false));
   }, [stand, view, hours, hoursLoading]);
 
@@ -88,7 +88,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
     fetch(`/api/stands/${encodeURIComponent(stand.standId)}/reviews`)
       .then((r) => r.json())
       .then((data) => setReviews(Array.isArray(data) ? data : []))
-      .catch(() => setReviews([]))
+      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviews([]); })
       .finally(() => setReviewsLoading(false));
   }, [stand, view, reviews.length, reviewsLoading]);
 

@@ -8,6 +8,7 @@ interface StandCardProps {
   avgValueRating: number;
   lastReviewedAt: Date;
   distance?: number | null;
+  visited?: boolean;
   sizeScoop?: { size: string; avgScoops: number }[];
   onShopClick?: () => void;
   onReviewClick?: () => void;
@@ -36,6 +37,7 @@ export default function StandCard({
   avgValueRating,
   lastReviewedAt,
   distance,
+  visited,
   sizeScoop,
   onShopClick,
   onReviewClick,
@@ -54,15 +56,22 @@ export default function StandCard({
             <p className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-tight truncate group-hover:text-brand transition-colors">{name}</p>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 truncate">{address}</p>
           </div>
-          {distance != null ? (
-            <span className="shrink-0 text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">
-              {distance.toFixed(1)} mi
-            </span>
-          ) : (
-            <span className="shrink-0 text-xs text-stone-300 dark:text-stone-600 bg-stone-50 dark:bg-stone-900 px-2 py-0.5 rounded">
-              — mi
-            </span>
-          )}
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            {distance != null ? (
+              <span className="text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">
+                {distance.toFixed(1)} mi
+              </span>
+            ) : (
+              <span className="text-xs text-stone-300 dark:text-stone-600 bg-stone-50 dark:bg-stone-900 px-2 py-0.5 rounded">
+                — mi
+              </span>
+            )}
+            {visited && (
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
+                ✓ Visited
+              </span>
+            )}
+          </div>
         </div>
       </button>
 

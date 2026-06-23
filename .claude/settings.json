@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(curl -s \"https://nominatim.openstreetmap.org/search?postalcode=03801&countrycodes=us&format=json&limit=1\" -H \"Accept-Language: en\" -A \"scoop-scoops/dev\")",
+      "Bash(docker exec *)",
+      "Read(//home/chaz/Documents/scoop-scoops-dev/src/components/**)",
+      "Bash(ls /home/chaz/Documents/scoop-scoops-dev/src/app/api/geocode/ 2>/dev/null || echo \"no geocode route in dev\")",
+      "Read(//home/chaz/Documents/scoop-scoops-dev/src/app/api/**)",
+      "Bash(ls /home/chaz/Documents/scoop-scoops-dev/src/app/api/ && cat /home/chaz/Documents/scoop-scoops-dev/package.json | grep -A5 '\"scripts\"')",
+      "Read(//home/chaz/Documents/scoop-scoops-dev/**)",
+      "Bash(npm install *)",
+      "Bash(cp /home/chaz/Documents/scoop-scoops/src/components/StandsList.tsx /home/chaz/Documents/scoop-scoops-dev/src/components/StandsList.tsx)",
+      "Bash(mkdir -p /home/chaz/Documents/scoop-scoops-dev/src/app/api/geocode)",
+      "Bash(cp /home/chaz/Documents/scoop-scoops/src/app/api/geocode/route.ts /home/chaz/Documents/scoop-scoops-dev/src/app/api/geocode/route.ts)",
+      "Bash(cp /home/chaz/Documents/scoop-scoops/src/app/api/geocode/route.test.ts /home/chaz/Documents/scoop-scoops-dev/src/app/api/geocode/route.test.ts)",
+      "Bash(cp /home/chaz/Documents/scoop-scoops/jest.config.ts /home/chaz/Documents/scoop-scoops-dev/jest.config.ts)",
+      "Bash(npm test *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops-dev add Dockerfile jest.config.js package.json package-lock.json src/app/api/geocode/ src/app/api/scoops/route.ts src/app/api/stands/route.ts src/app/api/stands/[standId]/reviews/route.ts src/app/page.tsx src/components/Footer.tsx src/components/LogScoopModal.tsx src/components/ScoopFeed.tsx src/components/StandCard.tsx src/components/StandModal.tsx src/components/StandSearch.tsx src/components/StandsList.tsx src/types/scoop.ts supabase/migrations/003_add_scoop_count.sql)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops-dev add -u src/components/ScoopCard.tsx)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops-dev commit -m ' *)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops push origin main)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops-dev push origin dev)",
+      "Bash(git push *)",
+      "Bash(git -C /home/chaz/Documents/scoop-scoops-dev log --oneline dev)",
+      "Bash(python3 -m http.server 7778 --directory /tmp)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:7778/modal-fullscreen-mobile.html)",
+      "WebFetch(domain:localhost)",
+      "Bash(find /home/chaz -name \"modal-fullscreen-*.html\" 2>/dev/null)",
+      "Read(//home/chaz/**)",
+      "Bash(rsync -a --delete src/components/LogScoopModal.tsx src/components/StandModal.tsx src/context/AuthContext.tsx src/app/api/scoops/route.ts src/app/api/geocode/route.ts /home/chaz/Documents/scoop-scoops-dev/src/components/)",
+      "Bash(rsync -a --delete src/context/AuthContext.tsx /home/chaz/Documents/scoop-scoops-dev/src/context/)",
+      "Bash(rsync -a --delete src/app/api/scoops/route.ts /home/chaz/Documents/scoop-scoops-dev/src/app/api/scoops/)",
+      "Bash(rsync -a --delete src/app/api/geocode/route.ts /home/chaz/Documents/scoop-scoops-dev/src/app/api/geocode/)"
+    ],
+    "additionalDirectories": [
+      "/home/chaz/Documents/scoop-scoops-dev/src/components",
+      "/home/chaz/Documents/scoop-scoops-dev",
+      "/tmp"
+    ]
+  }
+}

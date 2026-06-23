@@ -3,7 +3,7 @@ import { Geist } from 'next/font/google';
 import Script from 'next/script';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import ThemeToggle from '@/components/ThemeToggle';
+import { LocationProvider } from '@/context/LocationContext';
 import './globals.css';
 
 const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -30,8 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100">
         <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
-          <ThemeToggle />
+          <AuthProvider>
+            <LocationProvider>{children}</LocationProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
       <Script

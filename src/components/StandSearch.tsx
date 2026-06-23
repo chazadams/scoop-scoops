@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Stand } from '@/types/scoop';
+import { useLocation } from '@/context/LocationContext';
 
 interface StandSearchProps {
   selected: Stand | null;
@@ -33,6 +34,7 @@ function PinIcon() {
 }
 
 export default function StandSearch({ selected, onSelect }: StandSearchProps) {
+  const { coords } = useLocation();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -69,8 +71,14 @@ export default function StandSearch({ selected, onSelect }: StandSearchProps) {
       setPredictions([]);
       return;
     }
+    const locationBias = coords
+      ? {
+          location: new window.google.maps.LatLng(coords.lat, coords.lng),
+          radius: 50000,
+        }
+      : {};
     serviceRef.current.getPlacePredictions(
-      { input, types: ['food', 'restaurant', 'store'] },
+      { input, types: ['food', 'restaurant', 'store'], ...locationBias },
       (results, status) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
           setPredictions(
@@ -85,7 +93,7 @@ export default function StandSearch({ selected, onSelect }: StandSearchProps) {
         }
       }
     );
-  }, []);
+  }, [coords]);
 
   const handleQueryChange = (value: string) => {
     setQuery(value);

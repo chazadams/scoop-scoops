@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
       const data = await res.json();
       const place = data.places?.[0];
       if (place?.latitude && place?.longitude) {
-        console.log(`[geocode] zippopotam ok: ${zip} → ${place.latitude}, ${place.longitude}`);
         return NextResponse.json({ lat: parseFloat(place.latitude), lng: parseFloat(place.longitude) });
       }
     }

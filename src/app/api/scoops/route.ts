@@ -8,6 +8,10 @@ export async function POST(request: Request) {
   const body = await request.json();
   const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId, scoopCount } = body;
 
+  if (!stand?.placeId || !flavor || !size || !container || !flavorRating || !valueRating || !userId) {
+    return Response.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
   // Upsert the stand by place_id so we don't create duplicates
   const { data: standRow, error: standError } = await supabase
     .from('stands')
