@@ -79,7 +79,7 @@ const SORT_LABELS: Record<SortMode, string> = {
 };
 
 export default function StandsList() {
-  const { coords, zip, source, loading: geoLoading, error: geoError, requestGPS, geocodeZip, clear } = useLocation();
+  const { coords, cityState, source, loading: geoLoading, error: geoError, requestGPS, geocodeZip, clear } = useLocation();
   const { user } = useAuth();
 
   const [stands, setStands] = useState<StandEntry[]>([]);
@@ -120,10 +120,7 @@ export default function StandsList() {
     if (sortMode === 'nearest' && !coords) zipRef.current?.focus();
   }, [sortMode, coords]);
 
-  // Sync zipInput display with context
-  useEffect(() => {
-    if (source === 'zip' && zip) setZipInput(zip);
-  }, [zip, source]);
+  // Nothing to sync — zip input is local only
 
   const handleZipSubmit = () => geocodeZip(zipInput);
 
@@ -167,7 +164,7 @@ export default function StandsList() {
             {coords ? (
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-stone-500 dark:text-stone-400">
-                  📍 {source === 'gps' ? 'Using your location' : `Zip ${zip}`}
+                  📍 {cityState ?? (source === 'gps' ? 'Using your location' : 'Location set')}
                 </span>
                 <button
                   onClick={clear}

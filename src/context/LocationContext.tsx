@@ -9,7 +9,7 @@ interface Coords {
 
 interface LocationContextValue {
   coords: Coords | null;
-  zip: string;
+  cityState: string | null;
   source: 'gps' | 'zip' | null;
   loading: boolean;
   error: string | null;
@@ -24,7 +24,7 @@ const STORAGE_KEY = 'scoop_location';
 
 interface PersistedLocation {
   coords: Coords | null;
-  zip: string;
+  cityState: string | null;
   source: 'gps' | 'zip' | null;
 }
 
@@ -33,7 +33,7 @@ function loadFromStorage(): PersistedLocation {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
-  return { coords: null, zip: '', source: null };
+  return { coords: null, cityState: null, source: null };
 }
 
 function saveToStorage(data: PersistedLocation) {
@@ -42,23 +42,32 @@ function saveToStorage(data: PersistedLocation) {
   } catch {}
 }
 
+async function reversGeocode(lat: number, lng: number): Promise<string | null> {
+  try {
+    const res = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.city && data.state) return `${data.city}, ${data.state}`;
+  } catch {}
+  return null;
+}
+
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [coords, setCoords] = useState<Coords | null>(null);
-  const [zip, setZip] = useState('');
+  const [cityState, setCityState] = useState<string | null>(null);
   const [source, setSource] = useState<'gps' | 'zip' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Restore from localStorage on mount
   useEffect(() => {
     const saved = loadFromStorage();
     if (saved.coords) setCoords(saved.coords);
-    if (saved.zip) setZip(saved.zip);
+    if (saved.cityState) setCityState(saved.cityState);
     if (saved.source) setSource(saved.source);
   }, []);
 
-  const persist = useCallback((c: Coords | null, z: string, s: 'gps' | 'zip' | null) => {
-    saveToStorage({ coords: c, zip: z, source: s });
+  const persist = useCallback((c: Coords | null, cs: string | null, s: 'gps' | 'zip' | null) => {
+    saveToStorage({ coords: c, cityState: cs, source: s });
   }, []);
 
   const requestGPS = useCallback(async () => {
@@ -70,17 +79,19 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setError(null);
     return new Promise<void>((resolve) => {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        async (pos) => {
           const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setCoords(c);
-          setZip('');
           setSource('gps');
-          persist(c, '', 'gps');
+          // Reverse geocode in background — update city/state when ready
+          const cs = await reversGeocode(c.lat, c.lng);
+          setCityState(cs);
+          persist(c, cs, 'gps');
           setLoading(false);
           resolve();
         },
         () => {
-          setError('Location access denied — enter a zip code instead.');
+          setError('Location access denied — try the Nearest tab to enter a zip code.');
           setLoading(false);
           resolve();
         },
@@ -104,9 +115,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const c = { lat: data.lat, lng: data.lng };
         setCoords(c);
-        setZip(trimmed);
         setSource('zip');
-        persist(c, trimmed, 'zip');
+        const cs = await reversGeocode(c.lat, c.lng);
+        setCityState(cs);
+        persist(c, cs, 'zip');
       } else {
         setError('Zip code not found — try again.');
       }
@@ -119,14 +131,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => {
     setCoords(null);
-    setZip('');
+    setCityState(null);
     setSource(null);
     setError(null);
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
   }, []);
 
   return (
-    <LocationContext.Provider value={{ coords, zip, source, loading, error, requestGPS, geocodeZip, clear }}>
+    <LocationContext.Provider value={{ coords, cityState, source, loading, error, requestGPS, geocodeZip, clear }}>
       {children}
     </LocationContext.Provider>
   );

@@ -62,7 +62,7 @@ interface NearbyStand {
 
 export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const { user, signInWithGoogle } = useAuth();
-  const { coords } = useLocation();
+  const { coords, loading: geoLoading, error: geoError, requestGPS } = useLocation();
   const [step, setStep] = useState(1);
   const [stand, setStand] = useState<Stand | null>(null);
   const [flavor, setFlavor] = useState('');
@@ -80,6 +80,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [nearbyStands, setNearbyStands] = useState<NearbyStand[]>([]);
+  const [locationPromptDismissed, setLocationPromptDismissed] = useState(false);
 
   // Fetch past flavors for the selected stand
   useEffect(() => {
@@ -143,7 +144,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     setContainer(null); setToppings([]); setPrice(''); setFlavorRating(0);
     setValueRating(0); setNotes(''); setSubmitted(false);
     setSubmitting(false); setSubmitError(null);
-    setPastFlavors([]); setFlavorFocused(false); setNearbyStands([]);
+    setPastFlavors([]); setFlavorFocused(false); setNearbyStands([]); setLocationPromptDismissed(false);
   };
 
   const handleSubmit = async () => {
@@ -237,6 +238,36 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
             <div className="flex-1 overflow-y-auto px-5 py-5">
               {step === 1 && (
                 <div className="flex flex-col gap-5">
+                  {!coords && !locationPromptDismissed && (
+                    <div className="bg-brand/5 border border-brand/15 rounded-xl p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-xl leading-none mt-0.5 flex-shrink-0">📍</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-stone-900 dark:text-stone-100">See nearby stands first?</p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 leading-relaxed">Share your location and we'll show the closest stands before you search.</p>
+                          {geoError && <p className="text-xs text-red-500 mt-1.5">{geoError}</p>}
+                          <div className="flex gap-2 mt-3">
+                            <button
+                              type="button"
+                              onClick={requestGPS}
+                              disabled={geoLoading}
+                              className="flex-1 px-4 py-2 rounded-lg bg-brand text-white text-xs font-bold tracking-wide uppercase hover:opacity-90 disabled:opacity-50 transition-opacity touch-manipulation"
+                            >
+                              {geoLoading ? 'Locating…' : 'Use my location'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setLocationPromptDismissed(true)}
+                              className="px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-700 text-xs font-bold tracking-wide uppercase text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors touch-manipulation"
+                            >
+                              No thanks
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {nearbyStands.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-2">
