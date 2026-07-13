@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 export async function GET() {
-  const [statsResult, scoopCountResult] = await Promise.all([
+  const [statsResult, scoopCountResult, dairyFreeResult] = await Promise.all([
     supabase
       .from('stand_stats')
       .select(`
@@ -18,6 +18,10 @@ export async function GET() {
       .from('scoops')
       .select('stand_id, size, scoop_count')
       .not('scoop_count', 'is', null),
+    supabase
+      .from('scoops')
+      .select('stand_id')
+      .eq('is_dairy_free', true),
   ]);
 
   if (statsResult.error) {
@@ -41,9 +45,12 @@ export async function GET() {
       .map(([size, { sum, count }]) => ({ size, avgScoops: Math.round(sum / count) }));
   }
 
+  const dairyFreeStandIds = new Set((dairyFreeResult.data ?? []).map((row) => row.stand_id));
+
   const data = statsResult.data.map((row) => ({
     ...row,
     sizeScoop: sizeScoop[row.stand_id] ?? [],
+    hasDairyFree: dairyFreeStandIds.has(row.stand_id),
   }));
 
   return Response.json(data);

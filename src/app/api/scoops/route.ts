@@ -6,7 +6,11 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId, scoopCount } = body;
+  const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId, scoopCount, dairyFree } = body;
+
+  if (!stand?.placeId || !flavor || !size || !container || !flavorRating || !valueRating || !userId) {
+    return Response.json({ error: 'Missing required fields' }, { status: 400 });
+  }
 
   // Upsert the stand by place_id so we don't create duplicates
   const { data: standRow, error: standError } = await supabase
@@ -36,6 +40,7 @@ export async function POST(request: Request) {
       value_rating: valueRating,
       notes: notes ?? null,
       scoop_count: scoopCount ?? null,
+      is_dairy_free: dairyFree ?? false,
     })
     .select('id')
     .single();

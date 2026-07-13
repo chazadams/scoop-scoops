@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import StandCard from './StandCard';
 import StandModal from './StandModal';
+import { useLocation } from '@/context/LocationContext';
+import { useAuth } from '@/context/AuthContext';
+import { haversine } from '@/lib/haversine';
 
 type SortMode = 'recent' | 'most-reviews' | 'nearest';
 
@@ -12,6 +15,7 @@ interface StandRow {
   avg_flavor_rating: number;
   avg_value_rating: number;
   last_reviewed_at: string;
+  hasDairyFree?: boolean;
   stands: {
     id: string;
     place_id: string;
@@ -34,6 +38,7 @@ interface StandEntry {
   avgValueRating: number;
   lastReviewedAt: Date;
   sizeScoop: { size: string; avgScoops: number }[];
+  hasDairyFree: boolean;
 }
 
 function toEntry(row: StandRow): StandEntry {
@@ -49,35 +54,28 @@ function toEntry(row: StandRow): StandEntry {
     avgValueRating: Number(row.avg_value_rating),
     lastReviewedAt: new Date(row.last_reviewed_at),
     sizeScoop: (row as StandRow & { sizeScoop?: { size: string; avgScoops: number }[] }).sizeScoop ?? [],
+    hasDairyFree: row.hasDairyFree ?? false,
   };
 }
 
-function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 3958.8; // miles
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 const SORT_LABELS: Record<SortMode, string> = {
+  nearest: 'Nearest',
   recent: 'Most Recent',
   'most-reviews': 'Most Reviews',
-  nearest: 'Nearest',
 };
 
 export default function ScoopFeed() {
+  const { coords, cityState, source, loading: geoLoading, error: geoError, requestGPS, geocodeZip, clear } = useLocation();
+  const { user } = useAuth();
+
   const [stands, setStands] = useState<StandEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStand, setSelectedStand] = useState<StandEntry | null>(null);
   const [modalView, setModalView] = useState<'details' | 'reviews'>('details');
-
-  const [sortMode, setSortMode] = useState<SortMode>('recent');
+  const [sortMode, setSortMode] = useState<SortMode>('nearest');
   const [zipInput, setZipInput] = useState('');
-  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [geoError, setGeoError] = useState<string | null>(null);
-  const [geoLoading, setGeoLoading] = useState(false);
+  const [visitedStandIds, setVisitedStandIds] = useState<Set<string>>(new Set());
   const zipRef = useRef<HTMLInputElement>(null);
 
   const fetchStands = useCallback(async () => {
@@ -97,44 +95,30 @@ export default function ScoopFeed() {
 
   useEffect(() => { fetchStands(); }, [fetchStands]);
 
-  // Focus zip input when switching to nearest mode
   useEffect(() => {
-    if (sortMode === 'nearest') zipRef.current?.focus();
-  }, [sortMode]);
+    if (!user) { setVisitedStandIds(new Set()); return; }
+    fetch(`/api/scoops/my-stands?userId=${encodeURIComponent(user.id)}`)
+      .then(r => r.json())
+      .then((ids: string[]) => { if (Array.isArray(ids)) setVisitedStandIds(new Set(ids)); })
+      .catch(() => {});
+  }, [user]);
 
-  const geocodeZip = useCallback(async () => {
-    const zip = zipInput.trim();
-    if (!zip) return;
-    if (!/^\d{5}(-\d{4})?$/.test(zip)) {
-      setGeoError('Enter a valid 5-digit zip code.');
-      return;
-    }
-    setGeoError(null);
-    setGeoLoading(true);
-    try {
-      const res = await fetch(`/api/geocode?zip=${encodeURIComponent(zip)}`);
-      const data = await res.json();
-      if (res.ok) {
-        setUserCoords({ lat: data.lat, lng: data.lng });
-      } else {
-        setGeoError('Zip code not found — try again.');
-      }
-    } catch {
-      setGeoError('Could not look up zip code.');
-    } finally {
-      setGeoLoading(false);
-    }
-  }, [zipInput]);
+  useEffect(() => {
+    if (sortMode === 'nearest' && !coords) zipRef.current?.focus();
+  }, [sortMode, coords]);
+
+  // Nothing to sync — zip input is local only
+
+  const handleZipSubmit = () => geocodeZip(zipInput);
 
   const sorted = [...stands].sort((a, b) => {
     if (sortMode === 'most-reviews') return b.totalScoops - a.totalScoops;
     if (sortMode === 'nearest') {
-      if (!userCoords) return 0;
-      const distA = a.lat != null && a.lng != null ? haversine(userCoords.lat, userCoords.lng, a.lat, a.lng) : Infinity;
-      const distB = b.lat != null && b.lng != null ? haversine(userCoords.lat, userCoords.lng, b.lat, b.lng) : Infinity;
+      if (!coords) return 0;
+      const distA = a.lat != null && a.lng != null ? haversine(coords.lat, coords.lng, a.lat, a.lng) : Infinity;
+      const distB = b.lat != null && b.lng != null ? haversine(coords.lat, coords.lng, b.lat, b.lng) : Infinity;
       return distA - distB;
     }
-    // recent
     return b.lastReviewedAt.getTime() - a.lastReviewedAt.getTime();
   });
 
@@ -158,93 +142,104 @@ export default function ScoopFeed() {
           ))}
         </div>
 
-        {sortMode === 'nearest' && (
-          <div className="max-w-5xl mx-auto px-4 pb-3 flex items-center gap-2">
-            <input
-              ref={zipRef}
-              type="text"
-              value={zipInput}
-              onChange={(e) => { setZipInput(e.target.value); setUserCoords(null); setGeoError(null); }}
-              onKeyDown={(e) => { if (e.key === 'Enter') geocodeZip(); }}
-              placeholder="Enter zip code"
-              className="w-36 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
-            />
-            <button
-              onClick={geocodeZip}
-              disabled={!zipInput.trim() || geoLoading}
-              className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
-            >
-              {geoLoading ? '…' : 'Go'}
-            </button>
-            {geoError && <p className="text-xs text-red-500">{geoError}</p>}
-            {userCoords && !geoError && <p className="text-xs text-stone-400">Sorted by distance</p>}
+        {sortMode === 'nearest' && !coords && (
+          <div className="max-w-5xl mx-auto px-4 pb-3">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={requestGPS}
+                  disabled={geoLoading}
+                  className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-brand text-white hover:opacity-90 disabled:opacity-40 transition-colors"
+                >
+                  {geoLoading ? '…' : '📍 Use my location'}
+                </button>
+                <span className="text-xs text-stone-400 dark:text-stone-500">or</span>
+                <input
+                  ref={zipRef}
+                  type="text"
+                  value={zipInput}
+                  onChange={(e) => setZipInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleZipSubmit(); }}
+                  placeholder="Enter zip code"
+                  className="w-32 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+                />
+                <button
+                  onClick={handleZipSubmit}
+                  disabled={!zipInput.trim() || geoLoading}
+                  className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:opacity-80 disabled:opacity-40 transition-colors"
+                >
+                  {geoLoading ? '…' : 'Go'}
+                </button>
+              </div>
+              {geoError && <p className="text-xs text-red-500">{geoError}</p>}
+            </div>
           </div>
         )}
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6">
-      {loading && (
-        <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
-      )}
+        {loading && (
+          <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">Loading stands…</div>
+        )}
 
-      {error && (
-        <div className="text-center py-16">
-          <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
-          <button onClick={fetchStands} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">
-            Try again
-          </button>
-        </div>
-      )}
+        {error && (
+          <div className="text-center py-16">
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
+            <button onClick={fetchStands} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">
+              Try again
+            </button>
+          </div>
+        )}
 
-      {!loading && !error && stands.length === 0 && (
-        <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">
-          No stands yet — log a scoop to add the first one!
-        </div>
-      )}
+        {!loading && !error && stands.length === 0 && (
+          <div className="text-center py-16 text-stone-400 dark:text-stone-500 text-sm">
+            No stands yet — log a scoop to add the first one!
+          </div>
+        )}
 
-      {!loading && !error && sorted.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sorted.map((s) => {
-            const distance =
-              sortMode === 'nearest' && userCoords && s.lat != null && s.lng != null
-                ? haversine(userCoords.lat, userCoords.lng, s.lat, s.lng)
-                : sortMode === 'nearest'
-                ? null
+        {!loading && !error && sorted.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {sorted.map((s) => {
+              const distance = coords && s.lat != null && s.lng != null
+                ? haversine(coords.lat, coords.lng, s.lat, s.lng)
                 : undefined;
-            return (
-              <StandCard
-                key={s.standId}
-                name={s.name}
-                address={s.address}
-                totalScoops={s.totalScoops}
-                avgFlavorRating={s.avgFlavorRating}
-                avgValueRating={s.avgValueRating}
-                lastReviewedAt={s.lastReviewedAt}
-                distance={distance}
-                sizeScoop={s.sizeScoop}
-                onShopClick={() => { setSelectedStand(s); setModalView('details'); }}
-                onReviewClick={() => { setSelectedStand(s); setModalView('reviews'); }}
-              />
-            );
-          })}
-        </div>
-      )}
+              return (
+                <StandCard
+                  key={s.standId}
+                  name={s.name}
+                  address={s.address}
+                  totalScoops={s.totalScoops}
+                  avgFlavorRating={s.avgFlavorRating}
+                  avgValueRating={s.avgValueRating}
+                  lastReviewedAt={s.lastReviewedAt}
+                  distance={distance}
+                  visited={visitedStandIds.has(s.standId)}
+                  sizeScoop={s.sizeScoop}
+                  hasDairyFree={s.hasDairyFree}
+                  onShopClick={() => { setSelectedStand(s); setModalView('details'); }}
+                  onReviewClick={() => { setSelectedStand(s); setModalView('reviews'); }}
+                />
+              );
+            })}
+          </div>
+        )}
 
-      <StandModal
-        stand={selectedStand ? {
-          standId: selectedStand.standId,
-          placeId: selectedStand.placeId,
-          name: selectedStand.name,
-          address: selectedStand.address,
-          totalScoops: selectedStand.totalScoops,
-          avgFlavorRating: selectedStand.avgFlavorRating,
-          avgValueRating: selectedStand.avgValueRating,
-          lastReviewedAt: selectedStand.lastReviewedAt,
-          sizeScoop: selectedStand.sizeScoop,
-        } : null}
-        initialView={modalView}
-        onClose={() => setSelectedStand(null)}
-      />
+        <StandModal
+          stand={selectedStand ? {
+            standId: selectedStand.standId,
+            placeId: selectedStand.placeId,
+            name: selectedStand.name,
+            address: selectedStand.address,
+            totalScoops: selectedStand.totalScoops,
+            avgFlavorRating: selectedStand.avgFlavorRating,
+            avgValueRating: selectedStand.avgValueRating,
+            lastReviewedAt: selectedStand.lastReviewedAt,
+            sizeScoop: selectedStand.sizeScoop,
+            hasDairyFree: selectedStand.hasDairyFree,
+          } : null}
+          initialView={modalView}
+          onClose={() => setSelectedStand(null)}
+        />
       </div>
     </section>
   );

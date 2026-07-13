@@ -13,6 +13,7 @@ interface ReviewRow {
   flavor_rating: number;
   value_rating: number;
   notes: string | null;
+  is_dairy_free: boolean;
   created_at: string;
 }
 
@@ -27,6 +28,7 @@ interface StandModalProps {
     avgValueRating: number;
     lastReviewedAt: Date;
     sizeScoop?: { size: string; avgScoops: number }[];
+    hasDairyFree?: boolean;
   } | null;
   initialView?: 'details' | 'reviews';
   onClose: () => void;
@@ -76,7 +78,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
     fetch(`/api/places/${encodeURIComponent(stand.placeId)}`)
       .then((r) => r.json())
       .then((data) => setHours(data.hours ?? null))
-      .catch(() => setHours(null))
+      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHours(null); })
       .finally(() => setHoursLoading(false));
   }, [stand, view, hours, hoursLoading]);
 
@@ -88,7 +90,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
     fetch(`/api/stands/${encodeURIComponent(stand.standId)}/reviews`)
       .then((r) => r.json())
       .then((data) => setReviews(Array.isArray(data) ? data : []))
-      .catch(() => setReviews([]))
+      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviews([]); })
       .finally(() => setReviewsLoading(false));
   }, [stand, view, reviews.length, reviewsLoading]);
 
@@ -121,6 +123,11 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
             )}
             <h2 className="font-bold text-stone-900 dark:text-stone-100 text-base leading-tight">{stand.name}</h2>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{stand.address}</p>
+            {stand.hasDairyFree && (
+              <span className="inline-block mt-1.5 text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">
+                🌱 Dairy-free options
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -238,6 +245,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                         {sizeLabel}{r.scoop_count != null ? ` · ${r.scoop_count} ${r.scoop_count === 1 ? 'scoop' : 'scoops'}` : ''}
                         {containerInfo ? ` · ${containerInfo.emoji} ${containerInfo.label}` : ''}
                         {r.price != null ? ` · $${r.price.toFixed(2)}` : ''}
+                        {r.is_dairy_free ? ' · 🌱 Non-dairy' : ''}
                       </p>
                     </div>
                     <span className="shrink-0 text-xs text-stone-400 dark:text-stone-500">{timeAgo(new Date(r.created_at))}</span>

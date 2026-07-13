@@ -19,6 +19,7 @@ export async function GET(
       flavor_rating,
       value_rating,
       notes,
+      is_dairy_free,
       created_at
     `)
     .eq('stand_id', standId)
