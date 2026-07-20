@@ -13,7 +13,6 @@ interface StandRow {
   stand_id: string;
   total_scoops: number;
   avg_flavor_rating: number;
-  avg_value_rating: number;
   last_reviewed_at: string;
   stands: {
     id: string;
@@ -34,7 +33,6 @@ interface StandEntry {
   lng: number | null;
   totalScoops: number;
   avgFlavorRating: number;
-  avgValueRating: number;
   lastReviewedAt: Date;
   sizeScoop: { size: string; avgScoops: number }[];
 }
@@ -49,7 +47,6 @@ function toEntry(row: StandRow): StandEntry {
     lng: row.stands?.lng ?? null,
     totalScoops: Number(row.total_scoops),
     avgFlavorRating: Number(row.avg_flavor_rating),
-    avgValueRating: Number(row.avg_value_rating),
     lastReviewedAt: new Date(row.last_reviewed_at),
     sizeScoop: (row as StandRow & { sizeScoop?: { size: string; avgScoops: number }[] }).sizeScoop ?? [],
   };
@@ -260,13 +257,6 @@ export default function StandsList() {
                         </div>
                         <span className="font-bold text-stone-700 dark:text-stone-200 tabular-nums">{s.avgFlavorRating.toFixed(1)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        <span className="font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500">Value</span>
-                        <div className="w-16 h-1 bg-stone-100 dark:bg-stone-700 rounded-full overflow-hidden">
-                          <div className="h-full bg-brand rounded-full" style={{ width: `${(s.avgValueRating / 5) * 100}%` }} />
-                        </div>
-                        <span className="font-bold text-stone-700 dark:text-stone-200 tabular-nums">{s.avgValueRating.toFixed(1)}</span>
-                      </div>
                       {s.sizeScoop[0] && (
                         <div className="text-xs">
                           <span className="font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500">Avg: </span>
@@ -291,7 +281,6 @@ export default function StandsList() {
             address: selectedStand.address,
             totalScoops: selectedStand.totalScoops,
             avgFlavorRating: selectedStand.avgFlavorRating,
-            avgValueRating: selectedStand.avgValueRating,
             lastReviewedAt: selectedStand.lastReviewedAt,
             sizeScoop: selectedStand.sizeScoop,
           } : null}

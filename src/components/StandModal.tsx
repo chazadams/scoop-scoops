@@ -11,7 +11,6 @@ interface ReviewRow {
   container: string;
   price: number | null;
   flavor_rating: number;
-  value_rating: number;
   notes: string | null;
   is_dairy_free: boolean;
   created_at: string;
@@ -25,7 +24,6 @@ interface StandModalProps {
     address: string;
     totalScoops: number;
     avgFlavorRating: number;
-    avgValueRating: number;
     lastReviewedAt: Date;
     sizeScoop?: { size: string; avgScoops: number }[];
     hasDairyFree?: boolean;
@@ -141,7 +139,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
         {view === 'details' && (
           <div className="px-5 py-5 flex flex-col gap-5">
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => stand.standId && setView('reviews')}
@@ -155,10 +153,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                 <span className="text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stand.avgFlavorRating.toFixed(1)}</span>
                 <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mt-0.5">Flavor</span>
               </div>
-              <div className="flex flex-col items-center bg-stone-50 dark:bg-stone-800 rounded-lg py-3 px-2">
-                <span className="text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stand.avgValueRating.toFixed(1)}</span>
-                <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mt-0.5">Value</span>
-              </div>
             </div>
 
             <p className="text-xs text-stone-400 dark:text-stone-500 -mt-2">
@@ -171,11 +165,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                 <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Flavor</span>
                 <RatingBar rating={stand.avgFlavorRating} />
                 <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{stand.avgFlavorRating.toFixed(1)}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Value</span>
-                <RatingBar rating={stand.avgValueRating} />
-                <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{stand.avgValueRating.toFixed(1)}</span>
               </div>
             </div>
 
@@ -255,11 +244,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                       <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Flavor</span>
                       <RatingBar rating={r.flavor_rating} />
                       <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-4 text-right tabular-nums">{r.flavor_rating}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Value</span>
-                      <RatingBar rating={r.value_rating} />
-                      <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-4 text-right tabular-nums">{r.value_rating}</span>
                     </div>
                   </div>
                   {r.notes && (

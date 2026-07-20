@@ -16,6 +16,13 @@ export default function Footer() {
       <p className="text-xs font-bold tracking-[0.1em] uppercase text-stone-400 dark:text-stone-500">Scoop Scoops</p>
       <div className="flex items-center justify-center gap-4 mt-2">
         <Link
+          href="/about"
+          className="text-xs text-stone-400 dark:text-stone-500 hover:text-brand transition-colors underline underline-offset-2"
+        >
+          About
+        </Link>
+        <span className="text-stone-200 dark:text-stone-700 select-none">·</span>
+        <Link
           href="/privacy"
           className="text-xs text-stone-400 dark:text-stone-500 hover:text-brand transition-colors underline underline-offset-2"
         >

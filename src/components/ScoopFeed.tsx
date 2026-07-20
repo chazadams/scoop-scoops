@@ -13,7 +13,6 @@ interface StandRow {
   stand_id: string;
   total_scoops: number;
   avg_flavor_rating: number;
-  avg_value_rating: number;
   last_reviewed_at: string;
   hasDairyFree?: boolean;
   stands: {
@@ -35,7 +34,6 @@ interface StandEntry {
   lng: number | null;
   totalScoops: number;
   avgFlavorRating: number;
-  avgValueRating: number;
   lastReviewedAt: Date;
   sizeScoop: { size: string; avgScoops: number }[];
   hasDairyFree: boolean;
@@ -51,7 +49,6 @@ function toEntry(row: StandRow): StandEntry {
     lng: row.stands?.lng ?? null,
     totalScoops: Number(row.total_scoops),
     avgFlavorRating: Number(row.avg_flavor_rating),
-    avgValueRating: Number(row.avg_value_rating),
     lastReviewedAt: new Date(row.last_reviewed_at),
     sizeScoop: (row as StandRow & { sizeScoop?: { size: string; avgScoops: number }[] }).sizeScoop ?? [],
     hasDairyFree: row.hasDairyFree ?? false,
@@ -210,7 +207,6 @@ export default function ScoopFeed() {
                   address={s.address}
                   totalScoops={s.totalScoops}
                   avgFlavorRating={s.avgFlavorRating}
-                  avgValueRating={s.avgValueRating}
                   lastReviewedAt={s.lastReviewedAt}
                   distance={distance}
                   visited={visitedStandIds.has(s.standId)}
@@ -232,7 +228,6 @@ export default function ScoopFeed() {
             address: selectedStand.address,
             totalScoops: selectedStand.totalScoops,
             avgFlavorRating: selectedStand.avgFlavorRating,
-            avgValueRating: selectedStand.avgValueRating,
             lastReviewedAt: selectedStand.lastReviewedAt,
             sizeScoop: selectedStand.sizeScoop,
             hasDairyFree: selectedStand.hasDairyFree,

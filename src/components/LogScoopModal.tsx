@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import StandSearch from './StandSearch';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
@@ -22,7 +22,6 @@ interface LogScoopModalProps {
 }
 
 const FLAVOR_DESCRIPTORS = ['Disappointing', 'Below average', 'Pretty good', 'Delicious', 'Life-changing'];
-const VALUE_DESCRIPTORS = ['Daylight robbery', 'Overpriced', 'Fair deal', 'Good value', 'Worth every penny'];
 
 const SIZES = Object.entries(SIZE_LABELS) as [Size, string][];
 const CONTAINERS = Object.entries(CONTAINER_LABELS) as [ContainerType, { label: string; emoji: string }][];
@@ -73,7 +72,6 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [dairyFree, setDairyFree] = useState(false);
   const [price, setPrice] = useState('');
   const [flavorRating, setFlavorRating] = useState(0);
-  const [valueRating, setValueRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [pastFlavors, setPastFlavors] = useState<string[]>([]);
   const [toppingOptions, setToppingOptions] = useState<string[]>([...TOPPINGS]);
@@ -149,16 +147,23 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const reset = () => {
     setStep(1); setStand(null); setFlavor(''); setSize(null); setScoopCount(null);
     setContainer(null); setToppings([]); setDairyFree(false); setPrice(''); setFlavorRating(0);
-    setValueRating(0); setNotes(''); setSubmitted(false);
+    setNotes(''); setSubmitted(false);
     setSubmitting(false); setSubmitError(null);
     setPastFlavors([]); setFlavorFocused(false); setNearbyStands([]); setLocationPromptDismissed(false);
     setCustomTopping('');
   };
+
+  // Reset stale state (e.g. the success view, a dismissed location prompt) each time the modal reopens
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (isOpen && !wasOpen.current) reset();
+    wasOpen.current = isOpen;
+  }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -174,7 +179,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
         body: JSON.stringify({
           stand, flavor, size, container,
           price: price ? parseInt(price, 10) : null,
-          toppings, flavorRating, valueRating, notes, scoopCount, dairyFree,
+          toppings, flavorRating, notes, scoopCount, dairyFree,
           userId: user.id,
         }),
       });
@@ -212,7 +217,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     : [];
 
   const step2Valid = flavor.trim().length > 0 && size !== null && container !== null;
-  const step3Valid = flavorRating > 0 && valueRating > 0;
+  const step3Valid = flavorRating > 0;
 
   const stepLabels = ['Find your stand', 'What did you get?', 'How was it?'];
 
@@ -534,12 +539,6 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     value={flavorRating}
                     onChange={setFlavorRating}
                     descriptors={FLAVOR_DESCRIPTORS}
-                  />
-                  <StarRating
-                    label="Was it worth the price?"
-                    value={valueRating}
-                    onChange={setValueRating}
-                    descriptors={VALUE_DESCRIPTORS}
                   />
                   <div>
                     <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">

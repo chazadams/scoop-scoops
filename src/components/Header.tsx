@@ -15,6 +15,7 @@ export default function Header() {
         <nav className="hidden sm:flex items-center gap-6">
           <Link href="/" className="text-xs font-semibold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">Discover</Link>
           <Link href="/stands" className="text-xs font-semibold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">Stands</Link>
+          <Link href="/about" className="text-xs font-semibold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 transition-colors">About</Link>
         </nav>
         <div className="flex items-center gap-3">
           {!loading && !user && (
