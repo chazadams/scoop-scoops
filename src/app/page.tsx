@@ -6,6 +6,7 @@ import ScoopFeed from '@/components/ScoopFeed';
 import LogScoopButton from '@/components/LogScoopButton';
 import LocationBanner from '@/components/LocationBanner';
 import IceCreamDayBanner from '@/components/IceCreamDayBanner';
+import StatsBanner from '@/components/StatsBanner';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -25,6 +26,8 @@ export default function Home() {
         <ScoopFeed key={feedKey} />
       </main>
       <Footer />
+      <div className="h-[52px]" aria-hidden="true" />
+      <StatsBanner refreshKey={feedKey} />
     </>
   );
 }

@@ -36,9 +36,9 @@ export const SIZE_LABELS: Record<Size, string> = {
 };
 
 export const CONTAINER_LABELS: Record<ContainerType, { label: string; emoji: string }> = {
+  'cake-cone': { label: 'Cake Cone', emoji: '🍧' },
   'sugar-cone': { label: 'Sugar Cone', emoji: '🍦' },
   'waffle-cone': { label: 'Waffle Cone', emoji: '🧇' },
-  'cake-cone': { label: 'Cake Cone', emoji: '🍧' },
   cup: { label: 'Bowl/Cup', emoji: '🥣' },
   dish: { label: 'Speciality', emoji: '🍨' },
 };
