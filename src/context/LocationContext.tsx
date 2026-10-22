@@ -61,6 +61,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = loadFromStorage();
+    // localStorage is only readable after hydration, so this sync has to live in an effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved.coords) setCoords(saved.coords);
     if (saved.cityState) setCityState(saved.cityState);
     if (saved.source) setSource(saved.source);

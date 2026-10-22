@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import StandSearch from './StandSearch';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
@@ -22,7 +22,6 @@ interface LogScoopModalProps {
 }
 
 const FLAVOR_DESCRIPTORS = ['Disappointing', 'Below average', 'Pretty good', 'Delicious', 'Life-changing'];
-const VALUE_DESCRIPTORS = ['Daylight robbery', 'Overpriced', 'Fair deal', 'Good value', 'Worth every penny'];
 
 const SIZES = Object.entries(SIZE_LABELS) as [Size, string][];
 const CONTAINERS = Object.entries(CONTAINER_LABELS) as [ContainerType, { label: string; emoji: string }][];
@@ -70,11 +69,13 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const [scoopCount, setScoopCount] = useState<number | null>(null);
   const [container, setContainer] = useState<ContainerType | null>(null);
   const [toppings, setToppings] = useState<Topping[]>([]);
+  const [dairyFree, setDairyFree] = useState(false);
   const [price, setPrice] = useState('');
   const [flavorRating, setFlavorRating] = useState(0);
-  const [valueRating, setValueRating] = useState(0);
   const [notes, setNotes] = useState('');
   const [pastFlavors, setPastFlavors] = useState<string[]>([]);
+  const [toppingOptions, setToppingOptions] = useState<string[]>([...TOPPINGS]);
+  const [customTopping, setCustomTopping] = useState('');
   const [flavorFocused, setFlavorFocused] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -91,9 +92,18 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
       .catch(() => {});
   }, [stand?.placeId]);
 
+  // Fetch the shared topping list (statics + any promoted custom toppings)
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch('/api/toppings')
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setToppingOptions(data); })
+      .catch(() => {});
+  }, [isOpen]);
+
   // Fetch nearby stands when modal opens and location is available
   useEffect(() => {
-    if (!isOpen || !coords) { setNearbyStands([]); return; }
+    if (!isOpen || !coords) return;
     Promise.all([
       fetch('/api/stands').then(r => r.json()),
       user ? fetch(`/api/scoops/my-stands?userId=${encodeURIComponent(user.id)}`).then(r => r.json()) : Promise.resolve([]),
@@ -128,10 +138,26 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
+  const reset = () => {
+    setStep(1); setStand(null); setFlavor(''); setSize(null); setScoopCount(null);
+    setContainer(null); setToppings([]); setDairyFree(false); setPrice(''); setFlavorRating(0);
+    setNotes(''); setSubmitted(false);
+    setSubmitting(false); setSubmitError(null);
+    setPastFlavors([]); setFlavorFocused(false); setNearbyStands([]); setLocationPromptDismissed(false);
+    setCustomTopping('');
+  };
+
+  // Reset stale state (e.g. the success view, a dismissed location prompt) each time the modal reopens
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (isOpen && !wasOpen.current) reset();
+    wasOpen.current = isOpen;
+  }, [isOpen]);
+
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') { reset(); onClose(); } };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,13 +165,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
   if (!isOpen) return null;
 
-  const reset = () => {
-    setStep(1); setStand(null); setFlavor(''); setSize(null); setScoopCount(null);
-    setContainer(null); setToppings([]); setPrice(''); setFlavorRating(0);
-    setValueRating(0); setNotes(''); setSubmitted(false);
-    setSubmitting(false); setSubmitError(null);
-    setPastFlavors([]); setFlavorFocused(false); setNearbyStands([]); setLocationPromptDismissed(false);
-  };
+  const shownNearbyStands = coords ? nearbyStands : [];
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -161,7 +181,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
         body: JSON.stringify({
           stand, flavor, size, container,
           price: price ? parseInt(price, 10) : null,
-          toppings, flavorRating, valueRating, notes, scoopCount,
+          toppings, flavorRating, notes, scoopCount, dairyFree,
           userId: user.id,
         }),
       });
@@ -185,12 +205,21 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
   const toggleTopping = (t: Topping) =>
     setToppings((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
 
+  const addCustomTopping = () => {
+    const trimmed = customTopping.trim();
+    if (!trimmed || toppings.includes(trimmed)) { setCustomTopping(''); return; }
+    setToppings((prev) => [...prev, trimmed]);
+    setCustomTopping('');
+  };
+
+  const toppingPills = [...toppingOptions, ...toppings.filter((t) => !toppingOptions.includes(t))];
+
   const suggestions = flavorFocused && flavor.length >= 3
     ? pastFlavors.filter(f => f.toLowerCase().includes(flavor.toLowerCase()))
     : [];
 
   const step2Valid = flavor.trim().length > 0 && size !== null && container !== null;
-  const step3Valid = flavorRating > 0 && valueRating > 0;
+  const step3Valid = flavorRating > 0;
 
   const stepLabels = ['Find your stand', 'What did you get?', 'How was it?'];
 
@@ -244,7 +273,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         <span className="text-xl leading-none mt-0.5 flex-shrink-0">📍</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-stone-900 dark:text-stone-100">See nearby stands first?</p>
-                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 leading-relaxed">Share your location and we'll show the closest stands before you search.</p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 leading-relaxed">Share your location and we&apos;ll show the closest stands before you search.</p>
                           {geoError && <p className="text-xs text-red-500 mt-1.5">{geoError}</p>}
                           <div className="flex gap-2 mt-3">
                             <button
@@ -268,13 +297,13 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     </div>
                   )}
 
-                  {nearbyStands.length > 0 && (
+                  {shownNearbyStands.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-2">
                         Nearby stands
                       </p>
                       <ul className="flex flex-col gap-2">
-                        {nearbyStands.map((s) => (
+                        {shownNearbyStands.map((s) => (
                           <li key={s.standId}>
                             <button
                               type="button"
@@ -304,9 +333,9 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                   )}
                   <div>
                     <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-2">
-                      {nearbyStands.length > 0 ? 'Or search for another stand' : 'Search for the stand you visited'}
+                      {shownNearbyStands.length > 0 ? 'Or search for another stand' : 'Search for the stand you visited'}
                     </p>
-                    <StandSearch selected={nearbyStands.some(s => s.placeId === stand?.placeId) ? null : stand} onSelect={setStand} />
+                    <StandSearch selected={shownNearbyStands.some(s => s.placeId === stand?.placeId) ? null : stand} onSelect={setStand} />
                   </div>
                 </div>
               )}
@@ -423,7 +452,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         Toppings <span className="font-normal normal-case">(optional)</span>
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {TOPPINGS.map((t) => (
+                        {toppingPills.map((t) => (
                           <button
                             key={t}
                             type="button"
@@ -438,6 +467,41 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                           </button>
                         ))}
                       </div>
+                      <div className="flex gap-2 mt-2">
+                        <input
+                          type="text"
+                          value={customTopping}
+                          onChange={(e) => setCustomTopping(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addCustomTopping(); } }}
+                          placeholder="Add your own…"
+                          className="flex-1 min-w-0 px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-brand text-stone-900 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={addCustomTopping}
+                          disabled={!customTopping.trim()}
+                          className="px-3 py-2 rounded-lg text-xs font-bold tracking-wide uppercase border border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-brand hover:text-brand disabled:opacity-40 transition-colors touch-manipulation"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">
+                        Dietary <span className="font-normal normal-case">(optional)</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setDairyFree((v) => !v)}
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors touch-manipulation ${
+                          dairyFree
+                            ? 'bg-brand border-brand text-white'
+                            : 'border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-brand hover:text-brand'
+                        }`}
+                      >
+                        🌱 Non-dairy option
+                      </button>
                     </div>
 
                     <div>
@@ -477,12 +541,6 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     value={flavorRating}
                     onChange={setFlavorRating}
                     descriptors={FLAVOR_DESCRIPTORS}
-                  />
-                  <StarRating
-                    label="Was it worth the price?"
-                    value={valueRating}
-                    onChange={setValueRating}
-                    descriptors={VALUE_DESCRIPTORS}
                   />
                   <div>
                     <label className="text-xs font-bold tracking-[0.08em] uppercase text-stone-400 dark:text-stone-500 block mb-1.5">

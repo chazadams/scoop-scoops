@@ -11,8 +11,8 @@ interface ReviewRow {
   container: string;
   price: number | null;
   flavor_rating: number;
-  value_rating: number;
   notes: string | null;
+  is_dairy_free: boolean;
   created_at: string;
 }
 
@@ -24,9 +24,9 @@ interface StandModalProps {
     address: string;
     totalScoops: number;
     avgFlavorRating: number;
-    avgValueRating: number;
     lastReviewedAt: Date;
     sizeScoop?: { size: string; avgScoops: number }[];
+    hasDairyFree?: boolean;
   } | null;
   initialView?: 'details' | 'reviews';
   onClose: () => void;
@@ -55,42 +55,41 @@ function todayIndex() {
 
 export default function StandModal({ stand, initialView = 'details', onClose }: StandModalProps) {
   const [view, setView] = useState<'details' | 'reviews'>(initialView);
-  const [hours, setHours] = useState<string[] | null>(null);
-  const [hoursLoading, setHoursLoading] = useState(false);
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
+  // Fetched data is tagged with the stand it belongs to; a mismatch means it's still loading.
+  const [hoursResult, setHoursResult] = useState<{ placeId: string; hours: string[] | null } | null>(null);
+  const [reviewsResult, setReviewsResult] = useState<{ standId: string; rows: ReviewRow[] } | null>(null);
 
-  // Reset view and data when stand changes
-  useEffect(() => {
+  // Reset view when stand changes
+  const [prevPlaceId, setPrevPlaceId] = useState(stand?.placeId);
+  if (stand?.placeId !== prevPlaceId) {
+    setPrevPlaceId(stand?.placeId);
     setView(initialView);
-    setHours(null);
-    setReviews([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stand?.placeId]);
+  }
+
+  const hoursLoading = !!stand && hoursResult?.placeId !== stand.placeId;
+  const hours = hoursLoading ? null : hoursResult?.hours ?? null;
+  const reviewsLoading = !!stand?.standId && reviewsResult?.standId !== stand.standId;
+  const reviews = !reviewsLoading && reviewsResult ? reviewsResult.rows : [];
 
   // Fetch hours when in details view
   useEffect(() => {
-    if (!stand || view !== 'details') return;
-    if (hours !== null || hoursLoading) return;
-    setHoursLoading(true);
-    fetch(`/api/places/${encodeURIComponent(stand.placeId)}`)
+    if (!stand || view !== 'details' || hoursResult?.placeId === stand.placeId) return;
+    const placeId = stand.placeId;
+    fetch(`/api/places/${encodeURIComponent(placeId)}`)
       .then((r) => r.json())
-      .then((data) => setHours(data.hours ?? null))
-      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHours(null); })
-      .finally(() => setHoursLoading(false));
-  }, [stand, view, hours, hoursLoading]);
+      .then((data) => setHoursResult({ placeId, hours: data.hours ?? null }))
+      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHoursResult({ placeId, hours: null }); });
+  }, [stand, view, hoursResult]);
 
   // Fetch reviews when in reviews view
   useEffect(() => {
-    if (!stand?.standId || view !== 'reviews') return;
-    if (reviews.length > 0 || reviewsLoading) return;
-    setReviewsLoading(true);
-    fetch(`/api/stands/${encodeURIComponent(stand.standId)}/reviews`)
+    if (!stand?.standId || view !== 'reviews' || reviewsResult?.standId === stand.standId) return;
+    const standId = stand.standId;
+    fetch(`/api/stands/${encodeURIComponent(standId)}/reviews`)
       .then((r) => r.json())
-      .then((data) => setReviews(Array.isArray(data) ? data : []))
-      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviews([]); })
-      .finally(() => setReviewsLoading(false));
-  }, [stand, view, reviews.length, reviewsLoading]);
+      .then((data) => setReviewsResult({ standId, rows: Array.isArray(data) ? data : [] }))
+      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviewsResult({ standId, rows: [] }); });
+  }, [stand, view, reviewsResult]);
 
   useEffect(() => {
     if (!stand) return;
@@ -121,6 +120,11 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
             )}
             <h2 className="font-bold text-stone-900 dark:text-stone-100 text-base leading-tight">{stand.name}</h2>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">{stand.address}</p>
+            {stand.hasDairyFree && (
+              <span className="inline-block mt-1.5 text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded">
+                🌱 Dairy-free options
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -134,7 +138,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
         {view === 'details' && (
           <div className="px-5 py-5 flex flex-col gap-5">
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => stand.standId && setView('reviews')}
@@ -148,10 +152,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                 <span className="text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stand.avgFlavorRating.toFixed(1)}</span>
                 <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mt-0.5">Flavor</span>
               </div>
-              <div className="flex flex-col items-center bg-stone-50 dark:bg-stone-800 rounded-lg py-3 px-2">
-                <span className="text-2xl font-bold text-stone-900 dark:text-stone-100 tabular-nums">{stand.avgValueRating.toFixed(1)}</span>
-                <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mt-0.5">Value</span>
-              </div>
             </div>
 
             <p className="text-xs text-stone-400 dark:text-stone-500 -mt-2">
@@ -164,11 +164,6 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                 <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Flavor</span>
                 <RatingBar rating={stand.avgFlavorRating} />
                 <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{stand.avgFlavorRating.toFixed(1)}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Value</span>
-                <RatingBar rating={stand.avgValueRating} />
-                <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{stand.avgValueRating.toFixed(1)}</span>
               </div>
             </div>
 
@@ -238,6 +233,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                         {sizeLabel}{r.scoop_count != null ? ` · ${r.scoop_count} ${r.scoop_count === 1 ? 'scoop' : 'scoops'}` : ''}
                         {containerInfo ? ` · ${containerInfo.emoji} ${containerInfo.label}` : ''}
                         {r.price != null ? ` · $${r.price.toFixed(2)}` : ''}
+                        {r.is_dairy_free ? ' · 🌱 Non-dairy' : ''}
                       </p>
                     </div>
                     <span className="shrink-0 text-xs text-stone-400 dark:text-stone-500">{timeAgo(new Date(r.created_at))}</span>
@@ -248,14 +244,9 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                       <RatingBar rating={r.flavor_rating} />
                       <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-4 text-right tabular-nums">{r.flavor_rating}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Value</span>
-                      <RatingBar rating={r.value_rating} />
-                      <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-4 text-right tabular-nums">{r.value_rating}</span>
-                    </div>
                   </div>
                   {r.notes && (
-                    <p className="text-xs text-stone-500 dark:text-stone-400 italic border-t border-stone-100 dark:border-stone-700 pt-2">"{r.notes}"</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 italic border-t border-stone-100 dark:border-stone-700 pt-2">&ldquo;{r.notes}&rdquo;</p>
                   )}
                 </div>
               );

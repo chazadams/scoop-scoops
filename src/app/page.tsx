@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import ScoopFeed from '@/components/ScoopFeed';
 import LogScoopButton from '@/components/LogScoopButton';
 import LocationBanner from '@/components/LocationBanner';
+import IceCreamDayBanner from '@/components/IceCreamDayBanner';
+import StatsBanner from '@/components/StatsBanner';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -15,6 +17,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <LocationBanner />
+        <IceCreamDayBanner />
         <div className="bg-white dark:bg-stone-900 border-b border-stone-100 dark:border-stone-800 px-4 py-4">
           <div className="max-w-5xl mx-auto">
             <LogScoopButton onScoopLogged={() => setFeedKey((k) => k + 1)} />
@@ -23,6 +26,8 @@ export default function Home() {
         <ScoopFeed key={feedKey} />
       </main>
       <Footer />
+      <div className="h-[52px]" aria-hidden="true" />
+      <StatsBanner refreshKey={feedKey} />
     </>
   );
 }

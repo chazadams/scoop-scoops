@@ -6,9 +6,9 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { stand, flavor, size, container, price, toppings, flavorRating, valueRating, notes, userId, scoopCount } = body;
+  const { stand, flavor, size, container, price, toppings, flavorRating, notes, userId, scoopCount, dairyFree } = body;
 
-  if (!stand?.placeId || !flavor || !size || !container || !flavorRating || !valueRating || !userId) {
+  if (!stand?.placeId || !flavor || !size || !container || !flavorRating || !userId) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
@@ -37,9 +37,10 @@ export async function POST(request: Request) {
       price: price ?? null,
       toppings: toppings ?? [],
       flavor_rating: flavorRating,
-      value_rating: valueRating,
+      value_rating: null,
       notes: notes ?? null,
       scoop_count: scoopCount ?? null,
+      is_dairy_free: dairyFree ?? false,
     })
     .select('id')
     .single();

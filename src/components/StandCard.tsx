@@ -5,11 +5,11 @@ interface StandCardProps {
   address: string;
   totalScoops: number;
   avgFlavorRating: number;
-  avgValueRating: number;
   lastReviewedAt: Date;
   distance?: number | null;
   visited?: boolean;
   sizeScoop?: { size: string; avgScoops: number }[];
+  hasDairyFree?: boolean;
   onShopClick?: () => void;
   onReviewClick?: () => void;
 }
@@ -34,11 +34,11 @@ export default function StandCard({
   address,
   totalScoops,
   avgFlavorRating,
-  avgValueRating,
   lastReviewedAt,
   distance,
   visited,
   sizeScoop,
+  hasDairyFree,
   onShopClick,
   onReviewClick,
 }: StandCardProps) {
@@ -71,6 +71,11 @@ export default function StandCard({
                 ✓ Visited
               </span>
             )}
+            {hasDairyFree && (
+              <span className="text-xs font-bold text-brand bg-brand/10 px-2 py-0.5 rounded whitespace-nowrap">
+                🌱 Dairy-free options
+              </span>
+            )}
           </div>
         </div>
       </button>
@@ -92,11 +97,6 @@ export default function StandCard({
             <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Flavor</span>
             <RatingBar rating={avgFlavorRating} />
             <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{avgFlavorRating.toFixed(1)}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 w-10 shrink-0">Value</span>
-            <RatingBar rating={avgValueRating} />
-            <span className="text-xs font-bold text-stone-700 dark:text-stone-200 w-6 text-right tabular-nums">{avgValueRating.toFixed(1)}</span>
           </div>
           {topSize && (
             <div className="flex items-center justify-between pt-1.5 mt-0.5 border-t border-stone-100 dark:border-stone-700">

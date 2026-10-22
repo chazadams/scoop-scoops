@@ -89,12 +89,14 @@ There are no tests.
 - `/api/stands/[standId]/reviews` — GET (scoops for a specific stand)
 - `/api/places/[placeId]` — GET (proxies Google Places API for opening hours; 1h cache)
 - `/auth/callback` — Handles Supabase OAuth code exchange; upserts user into `public.users`
+- `/admin/stats` — Weekly Scoops/Page Views/Logins/Errors report, gated by `ADMIN_EMAIL`
 
 ### Supabase Clients
 
-Two separate clients exist for different rendering contexts:
-- `src/lib/supabase.ts` — Plain `createClient` for **server-side** API routes
+Three separate clients exist for different rendering contexts:
+- `src/lib/supabase.ts` — Plain `createClient` (anon key) for **server-side** API routes
 - `src/lib/supabase-browser.ts` — `createBrowserClient` from `@supabase/ssr` for **client components**
+- `src/lib/supabase-admin.ts` — Service-role `createClient`, server-only, for the `page_views`/`login_events`/`error_log` tables (no RLS policies for the anon/authenticated roles)
 
 Always use the browser client in `'use client'` components and the server client in API routes.
 
@@ -104,13 +106,20 @@ Google OAuth via Supabase. `AuthContext` (`src/context/AuthContext.tsx`) exposes
 
 ### Database Schema
 
-Three tables + one view (migrations in `supabase/migrations/`):
+Core tables + one view (migrations in `supabase/migrations/`):
 - `stands` — one row per unique Google Place (`place_id` is the unique key); has `lat`/`lng`
 - `scoops` — one log per visit; references `stands.id` and `users.id`; stores flavor, size, container, toppings (text[]), price, flavor_rating, value_rating, notes
 - `users` — extends `auth.users`; stores display name
 - `stand_stats` (view) — aggregates avg ratings, total scoops, `last_reviewed_at` per stand
 
 Stands are upserted by `place_id` on every `POST /api/scoops` so duplicates can't accumulate.
+
+Admin/observability tables, written only via `src/lib/supabase-admin.ts`:
+- `page_views` — one row per non-API GET request, logged from `src/proxy.ts`
+- `login_events` — one row per OAuth sign-in, logged from `/auth/callback`
+- `error_log` — server errors, logged from `src/instrumentation.ts`'s `onRequestError`
+
+`/admin/stats` (gated by `ADMIN_EMAIL`) reads these three plus `scoops` to show the trailing-7-day counts.
 
 ### Theme
 
@@ -130,4 +139,6 @@ The Maps JS SDK (with the `places` library) is loaded as an `afterInteractive` s
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+SUPABASE_SERVICE_ROLE_KEY   # server-only, for src/lib/supabase-admin.ts
+ADMIN_EMAIL                 # gates access to /admin/stats
 ```
