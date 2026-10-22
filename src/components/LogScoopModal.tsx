@@ -103,7 +103,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
 
   // Fetch nearby stands when modal opens and location is available
   useEffect(() => {
-    if (!isOpen || !coords) { setNearbyStands([]); return; }
+    if (!isOpen || !coords) return;
     Promise.all([
       fetch('/api/stands').then(r => r.json()),
       user ? fetch(`/api/scoops/my-stands?userId=${encodeURIComponent(user.id)}`).then(r => r.json()) : Promise.resolve([]),
@@ -138,15 +138,6 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose(); };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
-
   const reset = () => {
     setStep(1); setStand(null); setFlavor(''); setSize(null); setScoopCount(null);
     setContainer(null); setToppings([]); setDairyFree(false); setPrice(''); setFlavorRating(0);
@@ -163,7 +154,18 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
     wasOpen.current = isOpen;
   }, [isOpen]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') { reset(); onClose(); } };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const shownNearbyStands = coords ? nearbyStands : [];
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -271,7 +273,7 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                         <span className="text-xl leading-none mt-0.5 flex-shrink-0">📍</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-stone-900 dark:text-stone-100">See nearby stands first?</p>
-                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 leading-relaxed">Share your location and we'll show the closest stands before you search.</p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 leading-relaxed">Share your location and we&apos;ll show the closest stands before you search.</p>
                           {geoError && <p className="text-xs text-red-500 mt-1.5">{geoError}</p>}
                           <div className="flex gap-2 mt-3">
                             <button
@@ -295,13 +297,13 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                     </div>
                   )}
 
-                  {nearbyStands.length > 0 && (
+                  {shownNearbyStands.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-2">
                         Nearby stands
                       </p>
                       <ul className="flex flex-col gap-2">
-                        {nearbyStands.map((s) => (
+                        {shownNearbyStands.map((s) => (
                           <li key={s.standId}>
                             <button
                               type="button"
@@ -331,9 +333,9 @@ export default function LogScoopModal({ isOpen, onClose }: LogScoopModalProps) {
                   )}
                   <div>
                     <p className="text-xs font-semibold tracking-wide uppercase text-stone-400 dark:text-stone-500 mb-2">
-                      {nearbyStands.length > 0 ? 'Or search for another stand' : 'Search for the stand you visited'}
+                      {shownNearbyStands.length > 0 ? 'Or search for another stand' : 'Search for the stand you visited'}
                     </p>
-                    <StandSearch selected={nearbyStands.some(s => s.placeId === stand?.placeId) ? null : stand} onSelect={setStand} />
+                    <StandSearch selected={shownNearbyStands.some(s => s.placeId === stand?.placeId) ? null : stand} onSelect={setStand} />
                   </div>
                 </div>
               )}

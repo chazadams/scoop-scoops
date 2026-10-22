@@ -76,7 +76,7 @@ const SORT_LABELS: Record<SortMode, string> = {
 };
 
 export default function StandsList() {
-  const { coords, cityState, source, loading: geoLoading, error: geoError, requestGPS, geocodeZip, clear } = useLocation();
+  const { coords, loading: geoLoading, error: geoError, requestGPS, geocodeZip } = useLocation();
   const { user } = useAuth();
 
   const [stands, setStands] = useState<StandEntry[]>([]);
@@ -88,25 +88,23 @@ export default function StandsList() {
   const [visitedStandIds, setVisitedStandIds] = useState<Set<string>>(new Set());
   const zipRef = useRef<HTMLInputElement>(null);
 
-  const fetchStands = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/stands');
-      if (!res.ok) throw new Error('Failed to load stands');
-      const rows: StandRow[] = await res.json();
-      setStands(rows.map(toEntry));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
+  const fetchStands = useCallback(() => {
+    fetch('/api/stands')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load stands');
+        return res.json();
+      })
+      .then((rows: StandRow[]) => setStands(rows.map(toEntry)))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Something went wrong'))
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { fetchStands(); }, [fetchStands]);
 
+  const retry = () => { setLoading(true); setError(null); fetchStands(); };
+
   useEffect(() => {
-    if (!user) { setVisitedStandIds(new Set()); return; }
+    if (!user) return;
     fetch(`/api/scoops/my-stands?userId=${encodeURIComponent(user.id)}`)
       .then(r => r.json())
       .then((ids: string[]) => { if (Array.isArray(ids)) setVisitedStandIds(new Set(ids)); })
@@ -199,7 +197,7 @@ export default function StandsList() {
         {error && (
           <div className="text-center py-16">
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-3">{error}</p>
-            <button onClick={fetchStands} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">Try again</button>
+            <button onClick={retry} className="text-xs font-bold tracking-wide uppercase text-brand hover:opacity-80 transition-colors">Try again</button>
           </div>
         )}
 
@@ -215,7 +213,7 @@ export default function StandsList() {
               const distance = coords && s.lat != null && s.lng != null
                 ? haversine(coords.lat, coords.lng, s.lat, s.lng)
                 : null;
-              const visited = visitedStandIds.has(s.standId);
+              const visited = !!user && visitedStandIds.has(s.standId);
 
               return (
                 <li key={s.standId}>

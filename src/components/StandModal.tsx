@@ -55,42 +55,41 @@ function todayIndex() {
 
 export default function StandModal({ stand, initialView = 'details', onClose }: StandModalProps) {
   const [view, setView] = useState<'details' | 'reviews'>(initialView);
-  const [hours, setHours] = useState<string[] | null>(null);
-  const [hoursLoading, setHoursLoading] = useState(false);
-  const [reviews, setReviews] = useState<ReviewRow[]>([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
+  // Fetched data is tagged with the stand it belongs to; a mismatch means it's still loading.
+  const [hoursResult, setHoursResult] = useState<{ placeId: string; hours: string[] | null } | null>(null);
+  const [reviewsResult, setReviewsResult] = useState<{ standId: string; rows: ReviewRow[] } | null>(null);
 
-  // Reset view and data when stand changes
-  useEffect(() => {
+  // Reset view when stand changes
+  const [prevPlaceId, setPrevPlaceId] = useState(stand?.placeId);
+  if (stand?.placeId !== prevPlaceId) {
+    setPrevPlaceId(stand?.placeId);
     setView(initialView);
-    setHours(null);
-    setReviews([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stand?.placeId]);
+  }
+
+  const hoursLoading = !!stand && hoursResult?.placeId !== stand.placeId;
+  const hours = hoursLoading ? null : hoursResult?.hours ?? null;
+  const reviewsLoading = !!stand?.standId && reviewsResult?.standId !== stand.standId;
+  const reviews = !reviewsLoading && reviewsResult ? reviewsResult.rows : [];
 
   // Fetch hours when in details view
   useEffect(() => {
-    if (!stand || view !== 'details') return;
-    if (hours !== null || hoursLoading) return;
-    setHoursLoading(true);
-    fetch(`/api/places/${encodeURIComponent(stand.placeId)}`)
+    if (!stand || view !== 'details' || hoursResult?.placeId === stand.placeId) return;
+    const placeId = stand.placeId;
+    fetch(`/api/places/${encodeURIComponent(placeId)}`)
       .then((r) => r.json())
-      .then((data) => setHours(data.hours ?? null))
-      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHours(null); })
-      .finally(() => setHoursLoading(false));
-  }, [stand, view, hours, hoursLoading]);
+      .then((data) => setHoursResult({ placeId, hours: data.hours ?? null }))
+      .catch((err) => { console.error('[StandModal] hours fetch error:', err); setHoursResult({ placeId, hours: null }); });
+  }, [stand, view, hoursResult]);
 
   // Fetch reviews when in reviews view
   useEffect(() => {
-    if (!stand?.standId || view !== 'reviews') return;
-    if (reviews.length > 0 || reviewsLoading) return;
-    setReviewsLoading(true);
-    fetch(`/api/stands/${encodeURIComponent(stand.standId)}/reviews`)
+    if (!stand?.standId || view !== 'reviews' || reviewsResult?.standId === stand.standId) return;
+    const standId = stand.standId;
+    fetch(`/api/stands/${encodeURIComponent(standId)}/reviews`)
       .then((r) => r.json())
-      .then((data) => setReviews(Array.isArray(data) ? data : []))
-      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviews([]); })
-      .finally(() => setReviewsLoading(false));
-  }, [stand, view, reviews.length, reviewsLoading]);
+      .then((data) => setReviewsResult({ standId, rows: Array.isArray(data) ? data : [] }))
+      .catch((err) => { console.error('[StandModal] reviews fetch error:', err); setReviewsResult({ standId, rows: [] }); });
+  }, [stand, view, reviewsResult]);
 
   useEffect(() => {
     if (!stand) return;
@@ -247,7 +246,7 @@ export default function StandModal({ stand, initialView = 'details', onClose }: 
                     </div>
                   </div>
                   {r.notes && (
-                    <p className="text-xs text-stone-500 dark:text-stone-400 italic border-t border-stone-100 dark:border-stone-700 pt-2">"{r.notes}"</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 italic border-t border-stone-100 dark:border-stone-700 pt-2">&ldquo;{r.notes}&rdquo;</p>
                   )}
                 </div>
               );
