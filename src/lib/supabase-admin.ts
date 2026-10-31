@@ -13,3 +13,14 @@ export function getSupabaseAdmin() {
   );
   return client;
 }
+
+// Best-effort insert for logging tables. Failures are logged, never thrown, so
+// a missing or bad key can't break the request being logged.
+export async function logAdminInsert(table: string, row: Record<string, unknown>) {
+  try {
+    const { error } = await getSupabaseAdmin().from(table).insert(row);
+    if (error) console.error(`${table} insert failed:`, error.message);
+  } catch (err) {
+    console.error(`${table} insert failed:`, err instanceof Error ? err.message : err);
+  }
+}

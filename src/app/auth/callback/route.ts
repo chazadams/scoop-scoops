@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { logAdminInsert } from '@/lib/supabase-admin';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -40,10 +40,7 @@ export async function GET(request: Request) {
         { onConflict: 'id' }
       );
 
-      const { error: loginEventError } = await getSupabaseAdmin()
-        .from('login_events')
-        .insert({ user_id: user.id });
-      if (loginEventError) console.error('login_events insert failed:', loginEventError.message);
+      await logAdminInsert('login_events', { user_id: user.id });
     }
   }
 

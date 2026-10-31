@@ -1,5 +1,6 @@
 services:
   gateway:
+    profiles: [gateway]
     build:
       context: .
       dockerfile: Dockerfile.gateway
