@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextFetchEvent, NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { logAdminInsert } from '@/lib/supabase-admin'
 
 export async function proxy(request: NextRequest, event: NextFetchEvent) {
   if (request.headers.get('x-forwarded-proto') === 'http') {
@@ -11,13 +11,7 @@ export async function proxy(request: NextRequest, event: NextFetchEvent) {
   }
 
   if (request.method === 'GET' && !request.nextUrl.pathname.startsWith('/api/')) {
-    event.waitUntil(
-      Promise.resolve(
-        getSupabaseAdmin().from('page_views').insert({ path: request.nextUrl.pathname })
-      ).then(({ error }) => {
-        if (error) console.error('page_views insert failed:', error.message)
-      })
-    )
+    event.waitUntil(logAdminInsert('page_views', { path: request.nextUrl.pathname }))
   }
 
   const response = NextResponse.next({ request })
